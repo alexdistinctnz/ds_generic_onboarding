@@ -1,1 +1,14 @@
-
+{
+  "name": "Distinct Onboarding Form",
+  "description": "Professional brand onboarding form with FormSpark integration",
+  "version": "1.0.1",
+  "cosmic": {
+    "framework": "static",
+    "buildCommand": "echo 'No build step required for static HTML'",
+    "outputDirectory": ".",
+    "installCommand": "echo 'No install step required'",
+    "devCommand": "echo 'Static HTML - no dev server needed'",
+    "rootDirectory": "."
+  },
+  "env": {}
+}
