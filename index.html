@@ -3,49 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Onboarding</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Brand Discovery & Onboarding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 id="form-title">Loading...</h1>
-            <p id="form-description">Loading...</p>
+    <div class="typeform-container">
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
         </div>
         
-        <form id="onboarding-form" class="onboarding-form">
-            <div id="questions-container">
-                <!-- Questions will be dynamically rendered here -->
-            </div>
-            
-            <div class="submit-section">
-                <button type="submit" id="submit-btn" class="submit-button">
-                    <span class="button-text">Submit</span>
-                    <div class="spinner" id="spinner"></div>
-                </button>
-            </div>
-        </form>
-        
-        <div id="success-message" class="message success-message" style="display: none;">
-            <div class="message-icon">✓</div>
-            <div class="message-text"></div>
-        </div>
-        
-        <div id="error-message" class="message error-message" style="display: none;">
-            <div class="message-icon">⚠</div>
-            <div class="message-text"></div>
+        <!-- Question Counter -->
+        <div class="question-counter" id="question-counter">
+            <span class="current-question">1</span> of <span class="total-questions">1</span>
         </div>
 
-        <div id="markdown-output" class="markdown-output" style="display: none;">
-            <h3>Onboarding Report</h3>
-            <p>Copy this markdown and paste it into your Notion page:</p>
-            <div class="markdown-container">
-                <textarea id="markdown-text" readonly></textarea>
-                <button type="button" id="copy-markdown-btn" class="copy-button">
-                    <span class="copy-text">Copy to Clipboard</span>
-                    <span class="copied-text" style="display: none;">Copied!</span>
+        <!-- Welcome Screen -->
+        <div class="question-screen active" id="welcome-screen">
+            <div class="question-content">
+                <div class="welcome-icon">✨</div>
+                <h1 class="question-title" id="form-title">Loading...</h1>
+                <p class="question-subtitle" id="form-description">Loading...</p>
+                <div class="helper-text">Press <kbd>Enter</kbd> to start</div>
+            </div>
+            <div class="navigation">
+                <button type="button" class="nav-button primary" id="start-button" onclick="typeform.nextQuestion()">
+                    Get Started
                 </button>
+            </div>
+        </div>
+
+        <!-- Question Screens -->
+        <div id="question-screens-container">
+            <!-- Questions will be dynamically rendered here -->
+        </div>
+
+        <!-- Final Screen -->
+        <div class="question-screen" id="final-screen">
+            <div class="question-content">
+                <div class="final-icon">🎉</div>
+                <h2 class="question-title">Almost done!</h2>
+                <p class="question-subtitle">Click below to generate your brand discovery report.</p>
+            </div>
+            <div class="navigation">
+                <button type="button" class="nav-button secondary" onclick="typeform.prevQuestion()">Back</button>
+                <button type="button" class="nav-button primary" id="generate-report-btn">
+                    <span class="button-text">Generate Report</span>
+                    <div class="button-spinner" style="display: none;"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="question-screen" id="success-screen">
+            <div class="question-content">
+                <div class="success-icon">✓</div>
+                <h2 class="question-title">Your report is ready!</h2>
+                <p class="question-subtitle">Copy the markdown below and paste it into your Notion page.</p>
+                
+                <div class="markdown-container">
+                    <textarea id="markdown-text" readonly></textarea>
+                    <button type="button" id="copy-markdown-btn" class="copy-button">
+                        <span class="copy-text">📋 Copy to Clipboard</span>
+                        <span class="copied-text" style="display: none;">✓ Copied!</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-toast" class="error-toast" style="display: none;">
+            <div class="toast-content">
+                <span class="toast-icon">⚠</span>
+                <span class="toast-text"></span>
             </div>
         </div>
     </div>

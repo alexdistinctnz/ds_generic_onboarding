@@ -1,14 +1,20 @@
-class OnboardingForm {
+class TypeformOnboarding {
     constructor() {
         this.config = null;
-        this.form = document.getElementById('onboarding-form');
-        this.questionsContainer = document.getElementById('questions-container');
-        this.submitButton = document.getElementById('submit-btn');
-        this.successMessage = document.getElementById('success-message');
-        this.errorMessage = document.getElementById('error-message');
-        this.markdownOutput = document.getElementById('markdown-output');
-        this.markdownText = document.getElementById('markdown-text');
-        this.copyButton = document.getElementById('copy-markdown-btn');
+        this.currentQuestionIndex = -1; // -1 for welcome screen
+        this.answers = {};
+        this.questionScreens = [];
+        
+        // DOM elements
+        this.progressFill = document.getElementById('progress-fill');
+        this.questionCounter = document.getElementById('question-counter');
+        this.currentQuestionSpan = this.questionCounter.querySelector('.current-question');
+        this.totalQuestionsSpan = this.questionCounter.querySelector('.total-questions');
+        this.questionsContainer = document.getElementById('question-screens-container');
+        this.welcomeScreen = document.getElementById('welcome-screen');
+        this.finalScreen = document.getElementById('final-screen');
+        this.successScreen = document.getElementById('success-screen');
+        this.errorToast = document.getElementById('error-toast');
         
         this.init();
     }
@@ -16,9 +22,10 @@ class OnboardingForm {
     async init() {
         try {
             await this.loadConfig();
-            this.setupForm();
-            this.renderQuestions();
-            this.attachEventListeners();
+            this.setupWelcomeScreen();
+            this.createQuestionScreens();
+            this.setupEventListeners();
+            this.updateProgress();
         } catch (error) {
             console.error('Failed to initialize form:', error);
             this.showError('Failed to load form configuration. Please try again later.');
@@ -33,53 +40,88 @@ class OnboardingForm {
         this.config = await response.json();
     }
 
-    setupForm() {
+    setupWelcomeScreen() {
         document.getElementById('form-title').textContent = this.config.title;
         document.getElementById('form-description').textContent = this.config.description;
-        document.querySelector('.submit-button .button-text').textContent = this.config.messages.submitButton;
+        this.totalQuestionsSpan.textContent = this.config.questions.length;
         
-        // Apply custom styling
-        if (this.config.styling) {
-            const root = document.documentElement;
-            if (this.config.styling.primaryColor) {
-                root.style.setProperty('--primary-color', this.config.styling.primaryColor);
-            }
-            if (this.config.styling.backgroundColor) {
-                document.body.style.backgroundColor = this.config.styling.backgroundColor;
-            }
-            if (this.config.styling.fontFamily) {
-                document.body.style.fontFamily = this.config.styling.fontFamily;
-            }
-        }
+        // Hide question counter on welcome screen
+        this.questionCounter.style.display = 'none';
     }
 
-    renderQuestions() {
+    createQuestionScreens() {
         this.questionsContainer.innerHTML = '';
         
-        this.config.questions.forEach(question => {
-            const questionElement = this.createQuestionElement(question);
-            this.questionsContainer.appendChild(questionElement);
+        this.config.questions.forEach((question, index) => {
+            const screen = this.createQuestionScreen(question, index);
+            this.questionsContainer.appendChild(screen);
+            this.questionScreens.push(screen);
         });
     }
 
-    createQuestionElement(question) {
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'question';
-        questionDiv.dataset.questionId = question.id;
-
-        const label = document.createElement('label');
-        label.className = 'question-label';
-        label.textContent = question.label;
-        if (question.required) {
-            label.innerHTML += ' <span class="required">*</span>';
+    createQuestionScreen(question, index) {
+        const screen = document.createElement('div');
+        screen.className = 'question-screen';
+        screen.id = `question-${index}`;
+        
+        const content = document.createElement('div');
+        content.className = 'question-content individual-question';
+        
+        // Question title and subtitle
+        const title = document.createElement('h2');
+        title.className = 'question-title';
+        title.textContent = question.label;
+        
+        const subtitle = document.createElement('p');
+        subtitle.className = 'question-subtitle';
+        subtitle.textContent = this.getQuestionSubtitle(question);
+        
+        content.appendChild(title);
+        if (subtitle.textContent) {
+            content.appendChild(subtitle);
         }
-
-        questionDiv.appendChild(label);
-
+        
+        // Input element
+        const inputContainer = document.createElement('div');
+        inputContainer.className = 'input-container';
+        
         const inputElement = this.createInputElement(question);
-        questionDiv.appendChild(inputElement);
-
-        return questionDiv;
+        inputContainer.appendChild(inputElement);
+        
+        content.appendChild(inputContainer);
+        
+        // Helper text
+        const helperText = document.createElement('div');
+        helperText.className = 'helper-text';
+        helperText.innerHTML = this.getHelperText(question);
+        content.appendChild(helperText);
+        
+        screen.appendChild(content);
+        
+        // Navigation
+        const navigation = document.createElement('div');
+        navigation.className = 'navigation';
+        
+        const backButton = document.createElement('button');
+        backButton.type = 'button';
+        backButton.className = 'nav-button secondary';
+        backButton.textContent = 'Back';
+        backButton.onclick = () => this.prevQuestion();
+        
+        const nextButton = document.createElement('button');
+        nextButton.type = 'button';
+        nextButton.className = 'nav-button primary';
+        nextButton.textContent = this.getNextButtonText(question, index);
+        nextButton.onclick = () => this.nextQuestion();
+        
+        if (index > 0) {
+            navigation.appendChild(backButton);
+        }
+        navigation.appendChild(nextButton);
+        
+        screen.appendChild(navigation);
+        
+        return screen;
     }
 
     createInputElement(question) {
@@ -103,14 +145,28 @@ class OnboardingForm {
 
     createTextInput(question) {
         const input = document.createElement('input');
-        input.type = question.type;
+        input.type = question.type || 'text';
         input.id = question.id;
         input.name = question.id;
         input.className = 'form-input';
         input.required = question.required || false;
+        
         if (question.placeholder) {
             input.placeholder = question.placeholder;
         }
+        
+        // Auto-save on input
+        input.addEventListener('input', (e) => {
+            this.answers[question.id] = e.target.value.trim();
+        });
+        
+        // Allow Enter to proceed
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                this.nextQuestion();
+            }
+        });
+        
         return input;
     }
 
@@ -121,16 +177,26 @@ class OnboardingForm {
         textarea.className = 'form-input';
         textarea.required = question.required || false;
         textarea.rows = question.rows || 3;
+        
         if (question.placeholder) {
             textarea.placeholder = question.placeholder;
         }
+        
+        // Auto-save on input
+        textarea.addEventListener('input', (e) => {
+            this.answers[question.id] = e.target.value.trim();
+        });
+        
+        // Auto-resize
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+        });
+        
         return textarea;
     }
 
     createSelect(question) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'select-wrapper';
-        
         const select = document.createElement('select');
         select.id = question.id;
         select.name = question.id;
@@ -148,173 +214,368 @@ class OnboardingForm {
             optionElement.textContent = option.label;
             select.appendChild(optionElement);
         });
-
-        wrapper.appendChild(select);
-        return wrapper;
+        
+        // Auto-save on change
+        select.addEventListener('change', (e) => {
+            this.answers[question.id] = e.target.value;
+            // Auto-proceed for select questions
+            setTimeout(() => {
+                if (e.target.value) {
+                    this.nextQuestion();
+                }
+            }, 300);
+        });
+        
+        return select;
     }
 
     createRadioGroup(question) {
-        const group = document.createElement('div');
-        group.className = 'radio-group';
+        const container = document.createElement('div');
+        container.className = 'options-container';
 
         question.options.forEach((option, index) => {
             const item = document.createElement('div');
-            item.className = 'radio-item';
-
+            item.className = 'option-item';
+            
             const input = document.createElement('input');
             input.type = 'radio';
             input.id = `${question.id}_${index}`;
             input.name = question.id;
             input.value = option.value;
             input.required = question.required || false;
-
+            
             const label = document.createElement('label');
             label.htmlFor = `${question.id}_${index}`;
             label.textContent = option.label;
-
+            
+            // Click handler for the entire item
+            item.addEventListener('click', () => {
+                // Deselect other options
+                container.querySelectorAll('.option-item').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                container.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                
+                // Select this option
+                input.checked = true;
+                item.classList.add('selected');
+                this.answers[question.id] = option.value;
+                
+                // Auto-proceed for radio questions
+                setTimeout(() => {
+                    this.nextQuestion();
+                }, 300);
+            });
+            
             item.appendChild(input);
             item.appendChild(label);
-            group.appendChild(item);
+            container.appendChild(item);
         });
 
-        return group;
+        return container;
     }
 
     createCheckboxGroup(question) {
-        const group = document.createElement('div');
-        group.className = 'checkbox-group';
+        const container = document.createElement('div');
+        container.className = 'options-container';
 
         question.options.forEach((option, index) => {
             const item = document.createElement('div');
-            item.className = 'checkbox-item';
-
+            item.className = 'option-item';
+            
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.id = `${question.id}_${index}`;
             input.name = question.id;
             input.value = option.value;
-
+            
             const label = document.createElement('label');
             label.htmlFor = `${question.id}_${index}`;
             label.textContent = option.label;
-
+            
+            // Click handler for the entire item
+            item.addEventListener('click', () => {
+                input.checked = !input.checked;
+                item.classList.toggle('selected', input.checked);
+                
+                // Update answers array
+                const currentAnswers = this.answers[question.id] || [];
+                if (input.checked) {
+                    if (!currentAnswers.includes(option.value)) {
+                        currentAnswers.push(option.value);
+                    }
+                } else {
+                    const index = currentAnswers.indexOf(option.value);
+                    if (index > -1) {
+                        currentAnswers.splice(index, 1);
+                    }
+                }
+                this.answers[question.id] = currentAnswers;
+            });
+            
             item.appendChild(input);
             item.appendChild(label);
-            group.appendChild(item);
+            container.appendChild(item);
         });
 
-        return group;
+        return container;
     }
 
-    attachEventListeners() {
-        this.form.addEventListener('submit', this.handleSubmit.bind(this));
-        this.copyButton.addEventListener('click', this.copyMarkdown.bind(this));
-    }
-
-    async handleSubmit(e) {
-        e.preventDefault();
+    getQuestionSubtitle(question) {
+        // Add engaging subtitles based on question content
+        const subtitles = {
+            brandStory: "Tell us why it was started and what problem you're solving for customers.",
+            mission: "What you do every day to serve your customers.",
+            vision: "Where you want to be in 5-10 years.",
+            purpose: "Why you exist beyond profit.",
+            coreValues: "List 3-5 values you live by.",
+            personality: "Pick 3-5 traits that best describe your brand.",
+            keyMessages: "If you could put 3 statements on a billboard, what would they be?",
+            targetAudience: "Tell us about who they are, what they care about most, and their pain points.",
+            demographics: "Select all that apply to your target customers.",
+            psychographics: "What motivates and drives your customers? Select all that apply.",
+            competitors: "Who do you consider your main competitors and what makes you different?",
+            heroProducts: "Tell us about your main products or services that you want to highlight.",
+            upcomingLaunches: "Tell us about any upcoming product launches or new developments.",
+            pricingStrategy: "How would you describe your pricing approach? Select all that apply.",
+            priorityChannels: "Tell us about your priority channels and why they're important.",
+            marketingChannels: "What other marketing channels do you use? Select all that apply.",
+            runsPaidAds: "This helps us understand your current advertising approach.",
+            adBudgetProcess: "Tell us about your approach to budgeting for advertising.",
+            adSpend: "What's your typical monthly advertising spend?",
+            campaignGoals: "What are your primary objectives with advertising? Select all that apply.",
+            bestAds: "Share links/screenshots if possible, or describe your best performing ads.",
+            worstAds: "Tell us about ads that didn't work and why you think they failed.",
+            analyticsTools: "Which analytics tools do you currently use? Select all that apply.",
+            admiredBrands: "Tell us about brands you admire (inside or outside your category).",
+            creativeStyles: "Help us understand your aesthetic preferences. Select all that apply.",
+            creativeNoGos: "Tell us about styles, colours, or tones we should avoid.",
+            toneOfVoice: "How should your brand sound? Select all that apply.",
+            contactInfo: "Who should we contact for approvals and communication?",
+            approvalWorkflow: "Select all that apply.",
+            keyDates: "Select all that apply.",
+            keyDatesDetails: "Add details about the key dates selected above.",
+            existingAssets: "Select all that apply.",
+            accessRequired: "Select all that apply."
+        };
         
-        if (!this.validateForm()) {
-            this.showError(this.config.messages.errorMessage);
-            return;
-        }
-
-        this.setLoading(true);
-        this.hideMessages();
-
-        try {
-            const formData = this.collectFormData();
-            const markdown = this.generateMarkdown(formData);
-            this.showMarkdownOutput(markdown);
-            this.showSuccess();
-        } catch (error) {
-            console.error('Form processing error:', error);
-            this.showError('There was an error processing your form. Please try again.');
-        } finally {
-            this.setLoading(false);
-        }
+        return subtitles[question.id] || '';
     }
 
-    validateForm() {
-        let isValid = true;
-        this.clearValidationErrors();
+    getHelperText(question) {
+        const helperTexts = {
+            text: 'Press <kbd>Enter</kbd> to continue',
+            email: 'Press <kbd>Enter</kbd> to continue',
+            tel: 'Press <kbd>Enter</kbd> to continue',
+            textarea: 'Take your time to provide detailed information',
+            select: 'Choose one option',
+            radio: 'Click to select',
+            checkbox: 'Select all that apply, then click Next'
+        };
+        
+        return helperTexts[question.type] || 'Click Next when ready';
+    }
 
-        this.config.questions.forEach(question => {
-            if (question.required) {
-                const value = this.getQuestionValue(question.id);
-                if (!value || (Array.isArray(value) && value.length === 0)) {
-                    this.showValidationError(question.id, 'This field is required');
-                    isValid = false;
-                }
+    getNextButtonText(question, index) {
+        if (index === this.config.questions.length - 1) {
+            return 'Finish';
+        }
+        
+        const nextTexts = {
+            checkbox: 'Next →',
+            textarea: 'Continue →'
+        };
+        
+        return nextTexts[question.type] || 'OK';
+    }
+
+    setupEventListeners() {
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                this.nextQuestion();
+            } else if (e.key === 'ArrowLeft' && e.altKey) {
+                this.prevQuestion();
             }
         });
-
-        return isValid;
+        
+        // Generate report button
+        document.getElementById('generate-report-btn').addEventListener('click', () => {
+            this.generateReport();
+        });
+        
+        // Copy markdown button
+        document.getElementById('copy-markdown-btn').addEventListener('click', () => {
+            this.copyMarkdown();
+        });
     }
 
-    getQuestionValue(questionId) {
-        const question = this.config.questions.find(q => q.id === questionId);
+    nextQuestion() {
+        // Validate current question before proceeding
+        if (this.currentQuestionIndex >= 0) {
+            const currentQuestion = this.config.questions[this.currentQuestionIndex];
+            if (!this.validateQuestion(currentQuestion)) {
+                return;
+            }
+        }
         
-        switch (question.type) {
-            case 'checkbox':
-                const checkboxes = document.querySelectorAll(`input[name="${questionId}"]:checked`);
-                return Array.from(checkboxes).map(cb => cb.value);
-            case 'radio':
-                const radio = document.querySelector(`input[name="${questionId}"]:checked`);
-                return radio ? radio.value : '';
-            default:
-                const input = document.querySelector(`[name="${questionId}"]`);
-                return input ? input.value.trim() : '';
+        // Hide current screen
+        this.hideCurrentScreen();
+        
+        // Move to next question
+        this.currentQuestionIndex++;
+        
+        // Show next screen
+        if (this.currentQuestionIndex >= this.config.questions.length) {
+            this.showFinalScreen();
+        } else {
+            this.showQuestionScreen(this.currentQuestionIndex);
+        }
+        
+        this.updateProgress();
+    }
+
+    prevQuestion() {
+        if (this.currentQuestionIndex <= -1) return;
+        
+        // Hide current screen
+        this.hideCurrentScreen();
+        
+        // Move to previous question
+        this.currentQuestionIndex--;
+        
+        // Show previous screen
+        if (this.currentQuestionIndex === -1) {
+            this.showWelcomeScreen();
+        } else {
+            this.showQuestionScreen(this.currentQuestionIndex);
+        }
+        
+        this.updateProgress();
+    }
+
+    validateQuestion(question) {
+        if (!question.required) return true;
+        
+        const answer = this.answers[question.id];
+        
+        if (!answer || (Array.isArray(answer) && answer.length === 0) || answer.toString().trim() === '') {
+            this.showError(`Please answer this question before continuing.`);
+            return false;
+        }
+        
+        return true;
+    }
+
+    hideCurrentScreen() {
+        const activeScreen = document.querySelector('.question-screen.active');
+        if (activeScreen) {
+            activeScreen.classList.add('exiting');
+            setTimeout(() => {
+                activeScreen.classList.remove('active', 'exiting');
+            }, 300);
         }
     }
 
-    collectFormData() {
-        const data = {
-            timestamp: new Date().toISOString(),
-            responses: {}
-        };
-
-        this.config.questions.forEach(question => {
-            const value = this.getQuestionValue(question.id);
-            data.responses[question.id] = {
-                question: question.label,
-                answer: value,
-                type: question.type
-            };
-        });
-
-        return data;
+    showWelcomeScreen() {
+        this.questionCounter.style.display = 'none';
+        setTimeout(() => {
+            this.welcomeScreen.classList.add('active');
+        }, 300);
     }
 
-    generateMarkdown(formData) {
+    showQuestionScreen(index) {
+        this.questionCounter.style.display = 'block';
+        this.currentQuestionSpan.textContent = index + 1;
+        
+        setTimeout(() => {
+            this.questionScreens[index].classList.add('active');
+            
+            // Focus the input element
+            const input = this.questionScreens[index].querySelector('.form-input, .option-item');
+            if (input && input.focus) {
+                input.focus();
+            }
+        }, 300);
+    }
+
+    showFinalScreen() {
+        this.questionCounter.style.display = 'none';
+        setTimeout(() => {
+            this.finalScreen.classList.add('active');
+        }, 300);
+    }
+
+    showSuccessScreen() {
+        setTimeout(() => {
+            this.finalScreen.classList.remove('active');
+            this.successScreen.classList.add('active');
+        }, 300);
+    }
+
+    updateProgress() {
+        const totalSteps = this.config.questions.length + 2; // +2 for welcome and final screens
+        const currentStep = Math.max(0, this.currentQuestionIndex + 2);
+        const progress = (currentStep / totalSteps) * 100;
+        
+        this.progressFill.style.width = `${progress}%`;
+    }
+
+    async generateReport() {
+        const generateBtn = document.getElementById('generate-report-btn');
+        const buttonText = generateBtn.querySelector('.button-text');
+        const spinner = generateBtn.querySelector('.button-spinner');
+        
+        // Show loading state
+        buttonText.style.display = 'none';
+        spinner.style.display = 'block';
+        generateBtn.disabled = true;
+        
+        try {
+            const markdown = this.generateMarkdown();
+            document.getElementById('markdown-text').value = markdown;
+            this.showSuccessScreen();
+        } catch (error) {
+            console.error('Report generation error:', error);
+            this.showError('There was an error generating your report. Please try again.');
+        } finally {
+            // Reset button state
+            buttonText.style.display = 'inline';
+            spinner.style.display = 'none';
+            generateBtn.disabled = false;
+        }
+    }
+
+    generateMarkdown() {
+        const timestamp = new Date().toISOString();
         let markdown = `# ${this.config.title}\n\n`;
         
         if (this.config.output.includeTimestamp) {
-            const date = new Date(formData.timestamp);
+            const date = new Date(timestamp);
             markdown += `**Submitted:** ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}\n\n`;
         }
 
         markdown += `---\n\n`;
 
-        Object.entries(formData.responses).forEach(([key, response]) => {
-            markdown += `## ${response.question}\n\n`;
+        this.config.questions.forEach(question => {
+            const answer = this.answers[question.id];
             
-            if (Array.isArray(response.answer)) {
-                if (response.answer.length > 0) {
-                    response.answer.forEach(item => {
-                        markdown += `- ${item}\n`;
-                    });
-                } else {
-                    markdown += `*No selections made*\n`;
-                }
-            } else if (response.answer.trim()) {
-                if (response.type === 'textarea') {
-                    markdown += `${response.answer}\n`;
-                } else {
-                    markdown += `**${response.answer}**\n`;
-                }
+            if (!answer || (Array.isArray(answer) && answer.length === 0)) {
+                return; // Skip empty answers
+            }
+            
+            markdown += `## ${question.label}\n\n`;
+            
+            if (Array.isArray(answer)) {
+                answer.forEach(item => {
+                    markdown += `- ${item}\n`;
+                });
+            } else if (question.type === 'textarea') {
+                markdown += `${answer}\n`;
             } else {
-                markdown += `*Not provided*\n`;
+                markdown += `**${answer}**\n`;
             }
             
             markdown += `\n`;
@@ -326,20 +587,16 @@ class OnboardingForm {
         return markdown;
     }
 
-    showMarkdownOutput(markdown) {
-        this.markdownText.value = markdown;
-        this.markdownOutput.style.display = 'block';
-        this.markdownOutput.scrollIntoView({ behavior: 'smooth' });
-    }
-
     async copyMarkdown() {
+        const markdownText = document.getElementById('markdown-text').value;
+        const copyButton = document.getElementById('copy-markdown-btn');
+        const copyText = copyButton.querySelector('.copy-text');
+        const copiedText = copyButton.querySelector('.copied-text');
+        
         try {
-            await navigator.clipboard.writeText(this.markdownText.value);
+            await navigator.clipboard.writeText(markdownText);
             
             // Show feedback
-            const copyText = this.copyButton.querySelector('.copy-text');
-            const copiedText = this.copyButton.querySelector('.copied-text');
-            
             copyText.style.display = 'none';
             copiedText.style.display = 'inline';
             
@@ -351,61 +608,29 @@ class OnboardingForm {
         } catch (error) {
             console.error('Failed to copy to clipboard:', error);
             // Fallback: select the text
-            this.markdownText.select();
-            this.markdownText.setSelectionRange(0, 99999);
+            const textArea = document.getElementById('markdown-text');
+            textArea.select();
+            textArea.setSelectionRange(0, 99999);
         }
-    }
-
-    clearValidationErrors() {
-        document.querySelectorAll('.validation-error').forEach(error => error.remove());
-        document.querySelectorAll('.form-input.error').forEach(input => {
-            input.classList.remove('error');
-        });
-    }
-
-    showValidationError(questionId, message) {
-        const questionDiv = document.querySelector(`[data-question-id="${questionId}"]`);
-        if (!questionDiv) return;
-
-        const input = questionDiv.querySelector('.form-input, input, select, textarea');
-        if (input) {
-            input.classList.add('error');
-        }
-
-        const errorElement = document.createElement('span');
-        errorElement.className = 'validation-error';
-        errorElement.textContent = message;
-        questionDiv.appendChild(errorElement);
-    }
-
-    setLoading(loading) {
-        this.submitButton.disabled = loading;
-        if (loading) {
-            this.submitButton.classList.add('loading');
-        } else {
-            this.submitButton.classList.remove('loading');
-        }
-    }
-
-    hideMessages() {
-        this.successMessage.style.display = 'none';
-        this.errorMessage.style.display = 'none';
-    }
-
-    showSuccess() {
-        this.successMessage.querySelector('.message-text').textContent = this.config.messages.successMessage;
-        this.successMessage.style.display = 'flex';
-        this.successMessage.scrollIntoView({ behavior: 'smooth' });
     }
 
     showError(message) {
-        this.errorMessage.querySelector('.message-text').textContent = message;
-        this.errorMessage.style.display = 'flex';
-        this.errorMessage.scrollIntoView({ behavior: 'smooth' });
+        const errorToast = this.errorToast;
+        const errorText = errorToast.querySelector('.toast-text');
+        
+        errorText.textContent = message;
+        errorToast.style.display = 'block';
+        
+        setTimeout(() => {
+            errorToast.style.display = 'none';
+        }, 4000);
     }
 }
 
+// Global instance for button onclick handlers
+let typeform;
+
 // Initialize the form when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new OnboardingForm();
+    typeform = new TypeformOnboarding();
 });
