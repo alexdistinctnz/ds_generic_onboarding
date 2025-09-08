@@ -8,7 +8,7 @@
   },
   "webhook": {
     "enabled": true,
-    "url": "https://n8n-n6lmm-u17933.vm.elestio.app/webhook-test/85341cac-9563-4001-84b1-5a47109dc330",
+    "url": "https://n8n-n6lmm-u17933.vm.elestio.app/webhook/85341cac-9563-4001-84b1-5a47109dc330",
     "method": "POST"
   },
   "questions": [
