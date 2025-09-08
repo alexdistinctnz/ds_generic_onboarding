@@ -200,28 +200,22 @@ body {
 .required-guidance {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(255, 215, 0, 0.15);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin: 16px 0 24px 0;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.9);
-    opacity: 0.7;
+    gap: 6px;
+    margin: 8px 0 16px 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    opacity: 0.8;
     transition: all 0.3s ease;
 }
 
 .required-guidance.active {
     opacity: 1;
-    background: rgba(255, 215, 0, 0.25);
-    border-color: rgba(255, 215, 0, 0.5);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    color: rgba(255, 215, 0, 0.9);
 }
 
 .guidance-icon {
-    font-size: 1.1rem;
-    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+    font-size: 0.9rem;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.4));
 }
 
 /* Form Inputs */

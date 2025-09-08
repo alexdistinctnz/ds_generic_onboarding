@@ -87,17 +87,17 @@ class TypeformOnboarding {
             content.appendChild(subtitle);
         }
         
-        // Add required guidance message
+        // Input element
+        const inputContainer = document.createElement('div');
+        inputContainer.className = 'input-container';
+        
+        // Add required guidance message right before the input
         if (question.required) {
             const requiredGuidance = document.createElement('div');
             requiredGuidance.className = 'required-guidance';
             requiredGuidance.innerHTML = `<span class="guidance-icon">💡</span> This question is required to continue`;
-            content.appendChild(requiredGuidance);
+            inputContainer.appendChild(requiredGuidance);
         }
-        
-        // Input element
-        const inputContainer = document.createElement('div');
-        inputContainer.className = 'input-container';
         
         const inputElement = this.createInputElement(question);
         inputContainer.appendChild(inputElement);
