@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Onboarding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="form-title">Loading...</h1>
+            <p id="form-description">Loading...</p>
+        </div>
+        
+        <form id="onboarding-form" class="onboarding-form">
+            <div id="questions-container">
+                <!-- Questions will be dynamically rendered here -->
+            </div>
+            
+            <div class="submit-section">
+                <button type="submit" id="submit-btn" class="submit-button">
+                    <span class="button-text">Submit</span>
+                    <div class="spinner" id="spinner"></div>
+                </button>
+            </div>
+        </form>
+        
+        <div id="success-message" class="message success-message" style="display: none;">
+            <div class="message-icon">✓</div>
+            <div class="message-text"></div>
+        </div>
+        
+        <div id="error-message" class="message error-message" style="display: none;">
+            <div class="message-icon">⚠</div>
+            <div class="message-text"></div>
+        </div>
+
+        <div id="markdown-output" class="markdown-output" style="display: none;">
+            <h3>Onboarding Report</h3>
+            <p>Copy this markdown and paste it into your Notion page:</p>
+            <div class="markdown-container">
+                <textarea id="markdown-text" readonly></textarea>
+                <button type="button" id="copy-markdown-btn" class="copy-button">
+                    <span class="copy-text">Copy to Clipboard</span>
+                    <span class="copied-text" style="display: none;">Copied!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
