@@ -151,6 +151,8 @@ class TypeformOnboarding {
                 return this.createRadioGroup(question);
             case 'checkbox':
                 return this.createCheckboxGroup(question);
+            case 'file':
+                return this.createFileUpload(question);
             default:
                 return this.createTextInput(question);
         }
@@ -342,6 +344,206 @@ class TypeformOnboarding {
         return container;
     }
 
+    createFileUpload(question) {
+        const container = document.createElement('div');
+        container.className = 'file-upload-container';
+        
+        // Create hidden file input
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.id = question.id;
+        fileInput.name = question.id;
+        fileInput.style.display = 'none';
+        fileInput.multiple = (question.maxFiles || 1) > 1;
+        
+        if (question.accept) {
+            fileInput.accept = question.accept;
+        }
+        
+        // Create drag & drop area
+        const dropZone = document.createElement('div');
+        dropZone.className = 'file-drop-zone';
+        dropZone.innerHTML = `
+            <div class="drop-zone-content">
+                <div class="upload-icon">📎</div>
+                <div class="upload-text">
+                    <div class="primary-text">${question.placeholder || 'Drop files here or click to browse'}</div>
+                    <div class="secondary-text">
+                        ${question.accept ? `Accepted formats: ${question.accept}` : ''}
+                        ${question.maxSize ? ` • Max ${question.maxSize}MB per file` : ''}
+                        ${question.maxFiles && question.maxFiles > 1 ? ` • Up to ${question.maxFiles} files` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Files display area
+        const filesDisplay = document.createElement('div');
+        filesDisplay.className = 'uploaded-files';
+        
+        // Initialize file tracking
+        if (!this.answers[question.id]) {
+            this.answers[question.id] = [];
+        }
+        
+        // Event handlers
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            this.handleFiles(question, Array.from(e.dataTransfer.files), filesDisplay);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            this.handleFiles(question, Array.from(e.target.files), filesDisplay);
+        });
+        
+        container.appendChild(fileInput);
+        container.appendChild(dropZone);
+        container.appendChild(filesDisplay);
+        
+        return container;
+    }
+
+    async handleFiles(question, files, filesDisplay) {
+        const maxFiles = question.maxFiles || 1;
+        const maxSize = (question.maxSize || 10) * 1024 * 1024; // Convert MB to bytes
+        const acceptedTypes = question.accept ? question.accept.split(',').map(type => type.trim()) : [];
+        
+        // Get current files
+        const currentFiles = this.answers[question.id] || [];
+        
+        // Validate and process each file
+        for (const file of files) {
+            // Check file count limit
+            if (currentFiles.length >= maxFiles) {
+                this.showGentleError(`Maximum ${maxFiles} files allowed for this question.`);
+                break;
+            }
+            
+            // Check file size
+            if (file.size > maxSize) {
+                this.showGentleError(`File "${file.name}" is too large. Maximum ${question.maxSize || 10}MB per file.`);
+                continue;
+            }
+            
+            // Check file type
+            if (acceptedTypes.length > 0) {
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                if (!acceptedTypes.includes(fileExtension)) {
+                    this.showGentleError(`File "${file.name}" type not accepted. Allowed: ${question.accept}`);
+                    continue;
+                }
+            }
+            
+            try {
+                // Convert file to base64
+                const base64 = await this.fileToBase64(file);
+                
+                const fileData = {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    data: base64
+                };
+                
+                currentFiles.push(fileData);
+                this.answers[question.id] = currentFiles;
+                
+            } catch (error) {
+                console.error('Error processing file:', error);
+                this.showGentleError(`Error processing file "${file.name}"`);
+            }
+        }
+        
+        // Update display
+        this.updateFilesDisplay(question, filesDisplay);
+    }
+
+    fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    updateFilesDisplay(question, filesDisplay) {
+        const files = this.answers[question.id] || [];
+        
+        if (files.length === 0) {
+            filesDisplay.innerHTML = '';
+            return;
+        }
+        
+        const filesHtml = files.map((file, index) => `
+            <div class="uploaded-file">
+                <div class="file-info">
+                    <div class="file-icon">${this.getFileIcon(file.name)}</div>
+                    <div class="file-details">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${this.formatFileSize(file.size)}</div>
+                    </div>
+                </div>
+                <button type="button" class="remove-file-btn" onclick="typeform.removeFile('${question.id}', ${index})">
+                    <span class="remove-icon">✕</span>
+                </button>
+            </div>
+        `).join('');
+        
+        filesDisplay.innerHTML = filesHtml;
+    }
+
+    removeFile(questionId, index) {
+        const files = this.answers[questionId] || [];
+        files.splice(index, 1);
+        this.answers[questionId] = files;
+        
+        // Find the question and update display
+        const question = this.config.questions.find(q => q.id === questionId);
+        const questionScreen = document.getElementById(`question-${this.config.questions.indexOf(question)}`);
+        const filesDisplay = questionScreen.querySelector('.uploaded-files');
+        
+        this.updateFilesDisplay(question, filesDisplay);
+    }
+
+    getFileIcon(filename) {
+        const extension = filename.split('.').pop().toLowerCase();
+        const icons = {
+            'pdf': '📄',
+            'doc': '📝',
+            'docx': '📝',
+            'png': '🖼️',
+            'jpg': '🖼️',
+            'jpeg': '🖼️',
+            'svg': '🎨',
+            'ai': '🎨',
+            'psd': '🎨',
+            'eps': '🎨'
+        };
+        return icons[extension] || '📎';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
     getQuestionSubtitle(question) {
         // Add engaging subtitles based on question content
         const subtitles = {
@@ -377,7 +579,10 @@ class TypeformOnboarding {
             keyDates: "Select all that apply.",
             keyDatesDetails: "Add details about the key dates selected above.",
             existingAssets: "Select all that apply.",
-            accessRequired: "Select all that apply."
+            accessRequired: "Select all that apply.",
+            brandGuidelines: "Share your brand guidelines document so we can understand your visual identity.",
+            logoFiles: "Upload your current logo files in various formats.",
+            existingCreatives: "Share any existing creative work, ads, or marketing materials."
         };
         
         return subtitles[question.id] || '';
@@ -405,7 +610,10 @@ class TypeformOnboarding {
                 'Optional - click to select or skip',
             checkbox: question.required ? 
                 'Please select at least one option, then click Next' : 
-                'Optional - select any that apply, then click Next'
+                'Optional - select any that apply, then click Next',
+            file: question.required ? 
+                'Please upload at least one file to continue' : 
+                'Optional - drag & drop files or click Next to skip'
         };
         
         return baseHelperTexts[question.type] || (question.required ? 

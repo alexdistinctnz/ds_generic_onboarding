@@ -482,6 +482,36 @@
       "required": false
     },
     {
+      "id": "brandGuidelines",
+      "type": "file",
+      "label": "Upload Brand Guidelines",
+      "placeholder": "Drop your brand guidelines document here or click to browse",
+      "required": false,
+      "accept": ".pdf,.doc,.docx",
+      "maxFiles": 1,
+      "maxSize": 10
+    },
+    {
+      "id": "logoFiles",
+      "type": "file",
+      "label": "Upload Logo Files",
+      "placeholder": "Drop your logo files here or click to browse",
+      "required": false,
+      "accept": ".png,.jpg,.jpeg,.svg,.ai,.eps",
+      "maxFiles": 5,
+      "maxSize": 5
+    },
+    {
+      "id": "existingCreatives",
+      "type": "file",
+      "label": "Upload Existing Creative Assets",
+      "placeholder": "Drop any existing creative work here or click to browse",
+      "required": false,
+      "accept": ".png,.jpg,.jpeg,.pdf,.ai,.psd",
+      "maxFiles": 10,
+      "maxSize": 10
+    },
+    {
       "id": "accessRequired",
       "type": "checkbox",
       "label": "Access Required",

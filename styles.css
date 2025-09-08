@@ -272,6 +272,124 @@ textarea.form-input {
     line-height: 1.6;
 }
 
+/* File Upload */
+.file-upload-container {
+    width: 100%;
+}
+
+.file-drop-zone {
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.file-drop-zone:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.file-drop-zone.drag-over {
+    border-color: #00d4aa;
+    background: rgba(0, 212, 170, 0.1);
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.2);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.upload-icon {
+    font-size: 2.5rem;
+    opacity: 0.7;
+}
+
+.upload-text {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.primary-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.secondary-text {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+}
+
+.uploaded-files {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.uploaded-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    backdrop-filter: blur(10px);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.file-icon {
+    font-size: 1.5rem;
+}
+
+.file-details {
+    flex: 1;
+}
+
+.file-name {
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.file-size {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+.remove-file-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.remove-file-btn:hover {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+}
+
 /* Options */
 .options-container {
     display: flex;
@@ -614,6 +732,30 @@ textarea.form-input {
     .action-button {
         min-width: auto;
         width: 100%;
+    }
+    
+    .file-drop-zone {
+        padding: 30px 15px;
+    }
+    
+    .upload-icon {
+        font-size: 2rem;
+    }
+    
+    .primary-text {
+        font-size: 1rem;
+    }
+    
+    .uploaded-file {
+        padding: 10px 12px;
+    }
+    
+    .file-icon {
+        font-size: 1.3rem;
+    }
+    
+    .file-name {
+        font-size: 0.85rem;
     }
 }
 
