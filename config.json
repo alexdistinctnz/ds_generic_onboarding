@@ -6,6 +6,11 @@
     "includeTimestamp": true,
     "includeQuestionTypes": false
   },
+  "webhook": {
+    "enabled": true,
+    "url": "https://n8n-n6lmm-u17933.vm.elestio.app/webhook-test/de293e5f-244c-4489-bf7b-1992487cc500",
+    "method": "POST"
+  },
   "questions": [
     {
       "id": "brandStory",
