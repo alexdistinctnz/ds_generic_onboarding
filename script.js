@@ -70,7 +70,13 @@ class TypeformOnboarding {
         // Question title and subtitle
         const title = document.createElement('h2');
         title.className = 'question-title';
-        title.textContent = question.label;
+        
+        // Add required indicator to title if needed
+        if (question.required) {
+            title.innerHTML = `${question.label} <span class="required-indicator">*</span>`;
+        } else {
+            title.textContent = question.label;
+        }
         
         const subtitle = document.createElement('p');
         subtitle.className = 'question-subtitle';
@@ -79,6 +85,14 @@ class TypeformOnboarding {
         content.appendChild(title);
         if (subtitle.textContent) {
             content.appendChild(subtitle);
+        }
+        
+        // Add required guidance message
+        if (question.required) {
+            const requiredGuidance = document.createElement('div');
+            requiredGuidance.className = 'required-guidance';
+            requiredGuidance.innerHTML = `<span class="guidance-icon">💡</span> This question is required to continue`;
+            content.appendChild(requiredGuidance);
         }
         
         // Input element
@@ -158,12 +172,17 @@ class TypeformOnboarding {
         // Auto-save on input
         input.addEventListener('input', (e) => {
             this.answers[question.id] = e.target.value.trim();
+            this.updateValidationState(question, e.target);
         });
         
         // Allow Enter to proceed
         input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.target.value.trim()) {
-                this.nextQuestion();
+            if (e.key === 'Enter') {
+                if (question.required && !e.target.value.trim()) {
+                    this.showGentleValidation(question, e.target);
+                } else {
+                    this.nextQuestion();
+                }
             }
         });
         
@@ -185,6 +204,7 @@ class TypeformOnboarding {
         // Auto-save on input
         textarea.addEventListener('input', (e) => {
             this.answers[question.id] = e.target.value.trim();
+            this.updateValidationState(question, e.target);
         });
         
         // Auto-resize
@@ -365,17 +385,33 @@ class TypeformOnboarding {
     }
 
     getHelperText(question) {
-        const helperTexts = {
-            text: 'Press <kbd>Enter</kbd> to continue',
-            email: 'Press <kbd>Enter</kbd> to continue',
-            tel: 'Press <kbd>Enter</kbd> to continue',
-            textarea: 'Take your time to provide detailed information',
-            select: 'Choose one option',
-            radio: 'Click to select',
-            checkbox: 'Select all that apply, then click Next'
+        const baseHelperTexts = {
+            text: question.required ? 
+                'Please enter your response, then press <kbd>Enter</kbd> to continue' : 
+                'Optional - press <kbd>Enter</kbd> to continue or skip',
+            email: question.required ? 
+                'Please enter your email address, then press <kbd>Enter</kbd>' : 
+                'Optional - press <kbd>Enter</kbd> to continue or skip',
+            tel: question.required ? 
+                'Please enter your phone number, then press <kbd>Enter</kbd>' : 
+                'Optional - press <kbd>Enter</kbd> to continue or skip',
+            textarea: question.required ? 
+                'Please share your thoughts - take your time with this one' : 
+                'Optional - feel free to share additional details or skip',
+            select: question.required ? 
+                'Please choose one option from the list' : 
+                'Optional - choose one option or skip',
+            radio: question.required ? 
+                'Please click to select your answer' : 
+                'Optional - click to select or skip',
+            checkbox: question.required ? 
+                'Please select at least one option, then click Next' : 
+                'Optional - select any that apply, then click Next'
         };
         
-        return helperTexts[question.type] || 'Click Next when ready';
+        return baseHelperTexts[question.type] || (question.required ? 
+            'Please provide an answer to continue' : 
+            'Optional - click Next when ready');
     }
 
     getNextButtonText(question, index) {
@@ -462,11 +498,71 @@ class TypeformOnboarding {
         const answer = this.answers[question.id];
         
         if (!answer || (Array.isArray(answer) && answer.length === 0) || answer.toString().trim() === '') {
-            this.showError(`Please answer this question before continuing.`);
+            this.showGentleError(`We'd love to hear your thoughts on this one before moving forward.`);
             return false;
         }
         
         return true;
+    }
+
+    updateValidationState(question, inputElement) {
+        if (!question.required) return;
+        
+        const hasValue = inputElement.value.trim().length > 0;
+        const questionScreen = inputElement.closest('.question-screen');
+        const requiredGuidance = questionScreen.querySelector('.required-guidance');
+        const nextButton = questionScreen.querySelector('.nav-button.primary');
+        
+        if (hasValue) {
+            // Remove any previous validation styling
+            inputElement.classList.remove('needs-attention');
+            if (requiredGuidance) {
+                requiredGuidance.classList.remove('active');
+            }
+            if (nextButton) {
+                nextButton.classList.remove('pulsing');
+            }
+        } else {
+            // Add gentle attention styling
+            inputElement.classList.add('needs-attention');
+            if (requiredGuidance) {
+                requiredGuidance.classList.add('active');
+            }
+        }
+    }
+
+    showGentleValidation(question, inputElement) {
+        // Add gentle visual feedback
+        const questionScreen = inputElement.closest('.question-screen');
+        const nextButton = questionScreen.querySelector('.nav-button.primary');
+        
+        inputElement.classList.add('gentle-shake');
+        if (nextButton) {
+            nextButton.classList.add('pulsing');
+        }
+        
+        // Remove shake animation after it completes
+        setTimeout(() => {
+            inputElement.classList.remove('gentle-shake');
+        }, 500);
+        
+        // Show a gentle reminder
+        this.showGentleError('This question helps us understand you better - please share your thoughts!');
+    }
+
+    showGentleError(message) {
+        const errorToast = this.errorToast;
+        const errorText = errorToast.querySelector('.toast-text');
+        
+        // Update styling for gentle messages
+        errorToast.classList.add('gentle-reminder');
+        errorText.textContent = message;
+        errorToast.style.display = 'block';
+        
+        setTimeout(() => {
+            errorToast.style.display = 'none';
+            errorToast.classList.remove('gentle-reminder');
+        }, 3000);
     }
 
     hideCurrentScreen() {
