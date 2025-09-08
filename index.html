@@ -27,11 +27,6 @@
                 <button type="button" class="nav-button primary" id="start-button" onclick="typeform.nextQuestion()">
                     Get Started
                 </button>
-                
-                <!-- Temporary test button -->
-                <button type="button" class="nav-button secondary test-button" id="test-webhook-btn" onclick="typeform.testWebhook()">
-                    🧪 Test Webhook
-                </button>
             </div>
         </div>
 
@@ -60,30 +55,23 @@
         <div class="question-screen" id="success-screen">
             <div class="question-content">
                 <div class="success-icon">✓</div>
-                <h2 class="question-title">Your report is ready!</h2>
-                <p class="question-subtitle">Your brand discovery report has been generated and sent to our system. You can also download or copy it below.</p>
+                <h2 class="question-title">Thank you!</h2>
+                <p class="question-subtitle">Your brand discovery report has been generated and sent to our system. You can download a copy for your records below.</p>
                 
                 <div class="success-actions">
                     <button type="button" id="download-markdown-btn" class="action-button primary">
                         <span class="button-icon">📥</span>
                         <span class="button-text">Download Report</span>
                     </button>
-                    
-                    <button type="button" id="copy-markdown-btn" class="action-button secondary">
-                        <span class="button-icon">📋</span>
-                        <span class="copy-text">Copy to Clipboard</span>
-                        <span class="copied-text" style="display: none;">✓ Copied!</span>
-                    </button>
-                </div>
-                
-                <div class="markdown-container">
-                    <textarea id="markdown-text" readonly></textarea>
                 </div>
                 
                 <div class="webhook-status" id="webhook-status" style="display: none;">
                     <div class="status-icon">📤</div>
                     <div class="status-text">Report successfully sent to our system!</div>
                 </div>
+                
+                <!-- Hidden textarea for download functionality -->
+                <textarea id="markdown-text" readonly style="display: none;"></textarea>
             </div>
         </div>
 
