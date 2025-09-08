@@ -42,17 +42,18 @@ body {
 
 /* Question Counter */
 .question-counter {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.15);
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.8rem;
     font-weight: 500;
-    z-index: 1000;
+    z-index: 10;
+    margin-bottom: 20px;
 }
 
 .current-question {
@@ -92,6 +93,7 @@ body {
     width: 100%;
     text-align: center;
     margin-bottom: 40px;
+    position: relative;
 }
 
 /* Icons */
@@ -169,6 +171,7 @@ body {
 .individual-question .question-title {
     font-size: 2rem;
     text-align: left;
+    margin-top: 40px;
     margin-bottom: 24px;
 }
 
@@ -515,11 +518,13 @@ textarea.form-input {
         width: 100%;
     }
     
+    .individual-question .question-title {
+        margin-top: 30px;
+    }
+    
     .question-counter {
-        top: 15px;
-        right: 15px;
-        font-size: 0.8rem;
-        padding: 6px 12px;
+        font-size: 0.75rem;
+        padding: 4px 10px;
     }
 }
 

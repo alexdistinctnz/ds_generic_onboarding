@@ -7,9 +7,6 @@ class TypeformOnboarding {
         
         // DOM elements
         this.progressFill = document.getElementById('progress-fill');
-        this.questionCounter = document.getElementById('question-counter');
-        this.currentQuestionSpan = this.questionCounter.querySelector('.current-question');
-        this.totalQuestionsSpan = this.questionCounter.querySelector('.total-questions');
         this.questionsContainer = document.getElementById('question-screens-container');
         this.welcomeScreen = document.getElementById('welcome-screen');
         this.finalScreen = document.getElementById('final-screen');
@@ -43,10 +40,6 @@ class TypeformOnboarding {
     setupWelcomeScreen() {
         document.getElementById('form-title').textContent = this.config.title;
         document.getElementById('form-description').textContent = this.config.description;
-        this.totalQuestionsSpan.textContent = this.config.questions.length;
-        
-        // Hide question counter on welcome screen
-        this.questionCounter.style.display = 'none';
     }
 
     createQuestionScreens() {
@@ -66,6 +59,12 @@ class TypeformOnboarding {
         
         const content = document.createElement('div');
         content.className = 'question-content individual-question';
+        
+        // Add question counter for individual questions
+        const counter = document.createElement('div');
+        counter.className = 'question-counter';
+        counter.innerHTML = `<span class="current-question">${index + 1}</span> of <span class="total-questions">${this.config.questions.length}</span>`;
+        content.appendChild(counter);
         
         // Question title and subtitle
         const title = document.createElement('h2');
@@ -576,16 +575,12 @@ class TypeformOnboarding {
     }
 
     showWelcomeScreen() {
-        this.questionCounter.style.display = 'none';
         setTimeout(() => {
             this.welcomeScreen.classList.add('active');
         }, 300);
     }
 
     showQuestionScreen(index) {
-        this.questionCounter.style.display = 'block';
-        this.currentQuestionSpan.textContent = index + 1;
-        
         setTimeout(() => {
             this.questionScreens[index].classList.add('active');
             
@@ -598,7 +593,6 @@ class TypeformOnboarding {
     }
 
     showFinalScreen() {
-        this.questionCounter.style.display = 'none';
         setTimeout(() => {
             this.finalScreen.classList.add('active');
         }, 300);
