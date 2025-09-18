@@ -4,6 +4,7 @@ class TypeformOnboarding {
         this.currentQuestionIndex = -1; // -1 for welcome screen
         this.answers = {};
         this.questionScreens = [];
+        this.isTransitioning = false; // Track if we're currently transitioning
         
         // DOM elements
         this.progressFill = document.getElementById('progress-fill');
@@ -656,6 +657,11 @@ class TypeformOnboarding {
     }
 
     nextQuestion() {
+        // Prevent multiple transitions
+        if (this.isTransitioning) {
+            return;
+        }
+        
         // Validate current question before proceeding
         if (this.currentQuestionIndex >= 0) {
             const currentQuestion = this.config.questions[this.currentQuestionIndex];
@@ -663,6 +669,9 @@ class TypeformOnboarding {
                 return;
             }
         }
+        
+        this.isTransitioning = true;
+        this.disableNavigation();
         
         // Hide current screen
         this.hideCurrentScreen();
@@ -678,10 +687,22 @@ class TypeformOnboarding {
         }
         
         this.updateProgress();
+        
+        // Reset transition state after animation completes
+        setTimeout(() => {
+            this.isTransitioning = false;
+            this.enableNavigation();
+        }, 600); // Match the CSS transition duration
     }
 
     prevQuestion() {
-        if (this.currentQuestionIndex <= -1) return;
+        // Prevent multiple transitions
+        if (this.isTransitioning || this.currentQuestionIndex <= -1) {
+            return;
+        }
+        
+        this.isTransitioning = true;
+        this.disableNavigation();
         
         // Hide current screen
         this.hideCurrentScreen();
@@ -697,6 +718,12 @@ class TypeformOnboarding {
         }
         
         this.updateProgress();
+        
+        // Reset transition state after animation completes
+        setTimeout(() => {
+            this.isTransitioning = false;
+            this.enableNavigation();
+        }, 600); // Match the CSS transition duration
     }
 
     validateQuestion(question) {
@@ -773,23 +800,36 @@ class TypeformOnboarding {
     }
 
     hideCurrentScreen() {
-        const activeScreen = document.querySelector('.question-screen.active');
-        if (activeScreen) {
-            activeScreen.classList.add('exiting');
+        // Find all active screens and clean them up
+        const activeScreens = document.querySelectorAll('.question-screen.active');
+        const exitingScreens = document.querySelectorAll('.question-screen.exiting');
+        
+        // Clean up any existing exiting screens
+        exitingScreens.forEach(screen => {
+            screen.classList.remove('active', 'exiting');
+        });
+        
+        // Handle the current active screen
+        activeScreens.forEach(screen => {
+            screen.classList.add('exiting');
             setTimeout(() => {
-                activeScreen.classList.remove('active', 'exiting');
+                screen.classList.remove('active', 'exiting');
             }, 300);
-        }
+        });
     }
 
     showWelcomeScreen() {
         setTimeout(() => {
+            // Ensure no other screens are active
+            this.clearAllActiveScreens();
             this.welcomeScreen.classList.add('active');
         }, 300);
     }
 
     showQuestionScreen(index) {
         setTimeout(() => {
+            // Ensure no other screens are active
+            this.clearAllActiveScreens();
             this.questionScreens[index].classList.add('active');
             
             // Focus the input element
@@ -802,13 +842,23 @@ class TypeformOnboarding {
 
     showFinalScreen() {
         setTimeout(() => {
+            // Ensure no other screens are active
+            this.clearAllActiveScreens();
             this.finalScreen.classList.add('active');
         }, 300);
     }
 
+    clearAllActiveScreens() {
+        // Remove active class from all screens to prevent overlaps
+        document.querySelectorAll('.question-screen.active').forEach(screen => {
+            screen.classList.remove('active');
+        });
+    }
+
     showSuccessScreen() {
         setTimeout(() => {
-            this.finalScreen.classList.remove('active');
+            // Ensure no other screens are active
+            this.clearAllActiveScreens();
             this.successScreen.classList.add('active');
         }, 300);
     }
@@ -972,6 +1022,24 @@ class TypeformOnboarding {
         setTimeout(() => {
             errorToast.style.display = 'none';
         }, 4000);
+    }
+
+    disableNavigation() {
+        // Disable all navigation buttons during transitions
+        const navButtons = document.querySelectorAll('.nav-button, .action-button');
+        navButtons.forEach(button => {
+            button.disabled = true;
+            button.style.opacity = '0.5';
+        });
+    }
+
+    enableNavigation() {
+        // Re-enable navigation buttons after transitions
+        const navButtons = document.querySelectorAll('.nav-button, .action-button');
+        navButtons.forEach(button => {
+            button.disabled = false;
+            button.style.opacity = '';
+        });
     }
 }
 
