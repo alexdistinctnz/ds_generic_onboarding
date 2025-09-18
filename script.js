@@ -514,11 +514,28 @@ class TypeformOnboarding {
             input.className = 'form-input structured-input';
             input.placeholder = field.placeholder || '';
             input.required = field.required || false;
+            input.dataset.fieldLabel = field.label;
+            input.dataset.fieldRequired = field.required || false;
 
             // Auto-save structured field data
             input.addEventListener('input', (e) => {
                 this.answers[question.id][field.label] = e.target.value.trim();
+                this.updateValidationState(question, e.target);
             });
+
+            // Allow Enter to proceed on single inputs
+            if (!field.rows && field.type !== 'textarea') {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        // Check if all required fields in this structured question are filled
+                        if (this.validateStructuredQuestion(question)) {
+                            this.nextQuestion();
+                        } else {
+                            this.showGentleValidation(question, e.target);
+                        }
+                    }
+                });
+            }
 
             fieldContainer.appendChild(label);
             fieldContainer.appendChild(input);
@@ -925,6 +942,11 @@ class TypeformOnboarding {
     validateQuestion(question) {
         if (!question.required) return true;
         
+        // Handle structured questions differently
+        if (question.type === 'structured') {
+            return this.validateStructuredQuestion(question);
+        }
+        
         const answer = this.answers[question.id];
         
         if (!answer || (Array.isArray(answer) && answer.length === 0) || answer.toString().trim() === '') {
@@ -935,28 +957,79 @@ class TypeformOnboarding {
         return true;
     }
 
+    validateStructuredQuestion(question) {
+        if (!question.required) return true;
+        
+        const answers = this.answers[question.id] || {};
+        const requiredFields = question.structure.filter(field => field.required);
+        
+        // Check if all required fields have values
+        for (const field of requiredFields) {
+            const value = answers[field.label];
+            if (!value || value.trim() === '') {
+                this.showGentleError(`Please fill out all required fields in this section.`);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
     updateValidationState(question, inputElement) {
         if (!question.required) return;
         
-        const hasValue = inputElement.value.trim().length > 0;
         const questionScreen = inputElement.closest('.question-screen');
         const requiredGuidance = questionScreen.querySelector('.required-guidance');
         const nextButton = questionScreen.querySelector('.nav-button.primary');
         
-        if (hasValue) {
-            // Remove any previous validation styling
-            inputElement.classList.remove('needs-attention');
-            if (requiredGuidance) {
-                requiredGuidance.classList.remove('active');
-            }
-            if (nextButton) {
-                nextButton.classList.remove('pulsing');
+        // For structured questions, check all required fields
+        if (question.type === 'structured') {
+            const structuredContainer = questionScreen.querySelector('.structured-input-container');
+            const requiredInputs = structuredContainer.querySelectorAll('.structured-input[data-field-required="true"]');
+            let allRequiredFilled = true;
+            
+            requiredInputs.forEach(input => {
+                const hasValue = input.value.trim().length > 0;
+                if (hasValue) {
+                    input.classList.remove('needs-attention');
+                } else {
+                    input.classList.add('needs-attention');
+                    allRequiredFilled = false;
+                }
+            });
+            
+            // Update overall validation state
+            if (allRequiredFilled) {
+                if (requiredGuidance) {
+                    requiredGuidance.classList.remove('active');
+                }
+                if (nextButton) {
+                    nextButton.classList.remove('pulsing');
+                }
+            } else {
+                if (requiredGuidance) {
+                    requiredGuidance.classList.add('active');
+                }
             }
         } else {
-            // Add gentle attention styling
-            inputElement.classList.add('needs-attention');
-            if (requiredGuidance) {
-                requiredGuidance.classList.add('active');
+            // Handle single input questions
+            const hasValue = inputElement.value.trim().length > 0;
+            
+            if (hasValue) {
+                // Remove any previous validation styling
+                inputElement.classList.remove('needs-attention');
+                if (requiredGuidance) {
+                    requiredGuidance.classList.remove('active');
+                }
+                if (nextButton) {
+                    nextButton.classList.remove('pulsing');
+                }
+            } else {
+                // Add gentle attention styling
+                inputElement.classList.add('needs-attention');
+                if (requiredGuidance) {
+                    requiredGuidance.classList.add('active');
+                }
             }
         }
     }
@@ -1154,7 +1227,16 @@ class TypeformOnboarding {
             
             markdown += `## ${question.label}\n\n`;
             
-            if (Array.isArray(answer)) {
+            if (question.type === 'structured') {
+                // Handle structured questions
+                if (typeof answer === 'object' && !Array.isArray(answer)) {
+                    Object.entries(answer).forEach(([key, value]) => {
+                        if (value && value.trim()) {
+                            markdown += `**${key}:** ${value}\n\n`;
+                        }
+                    });
+                }
+            } else if (Array.isArray(answer)) {
                 answer.forEach(item => {
                     markdown += `- ${item}\n`;
                 });

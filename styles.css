@@ -73,7 +73,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 40px 40px 120px 40px;
+    padding: 40px 40px 60px 40px;
     opacity: 0;
     transform: translateX(50px);
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -189,9 +189,9 @@ body {
 
 /* Section Indicator */
 .section-indicator {
-    position: sticky;
+    position: absolute;
     top: 20px;
-    right: 0;
+    right: 20px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -202,9 +202,7 @@ body {
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 500;
-    z-index: 15;
-    margin-bottom: 20px;
-    align-self: flex-end;
+    z-index: 5;
 }
 
 .section-icon {
@@ -297,6 +295,11 @@ body {
     font-size: 1rem;
 }
 
+.structured-input.needs-attention {
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.15);
+}
+
 /* Other Option Input */
 .other-option-container {
     margin-top: 16px;
@@ -321,17 +324,6 @@ body {
     text-align: left;
     margin-top: 20px;
     margin-bottom: 24px;
-    position: sticky;
-    top: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    backdrop-filter: blur(10px);
-    padding: 16px 0;
-    margin-left: -20px;
-    margin-right: -20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    border-radius: 12px;
-    z-index: 5;
 }
 
 .individual-question .question-subtitle {
@@ -596,14 +588,8 @@ textarea.form-input {
     justify-content: center;
     width: 100%;
     max-width: 500px;
-    position: sticky;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    backdrop-filter: blur(10px);
-    padding: 20px 0;
     margin-top: 40px;
-    border-radius: 12px;
-    z-index: 10;
+    padding: 20px 0;
 }
 
 .nav-button {
@@ -848,7 +834,7 @@ textarea.form-input {
     }
     
     .question-screen {
-        padding: 20px 20px 100px 20px;
+        padding: 20px 20px 60px 20px;
     }
     
     .question-content {
@@ -877,7 +863,8 @@ textarea.form-input {
     
     .navigation {
         flex-direction: column;
-        padding: 15px 0;
+        padding: 20px 0;
+        margin-top: 30px;
     }
     
     .nav-button {
@@ -885,8 +872,9 @@ textarea.form-input {
     }
     
     .section-indicator {
-        position: sticky;
+        position: absolute;
         top: 10px;
+        right: 10px;
         font-size: 0.75rem;
         padding: 6px 12px;
     }

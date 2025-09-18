@@ -139,17 +139,20 @@
         {
           "label": "Who they are",
           "placeholder": "Describe your ideal customers - age, profession, lifestyle...",
-          "rows": 2
+          "rows": 2,
+          "required": true
         },
         {
           "label": "What they care about",
           "placeholder": "What matters most to them? What motivates them?",
-          "rows": 2
+          "rows": 2,
+          "required": true
         },
         {
           "label": "Their pain points",
           "placeholder": "What problems or challenges do they face that you solve?",
-          "rows": 2
+          "rows": 2,
+          "required": true
         }
       ]
     },
