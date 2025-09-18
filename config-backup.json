@@ -1,0 +1,547 @@
+{
+  "version": "1.2.0",
+  "title": "Brand Discovery & Onboarding",
+  "description": "We'll guide you through a series of thoughtful questions to understand your brand's essence. This conversation typically takes 10-15 minutes.",
+  "output": {
+    "format": "markdown",
+    "includeTimestamp": true,
+    "includeQuestionTypes": false
+  },
+  "webhook": {
+    "enabled": true,
+    "url": "https://n8n-n6lmm-u17933.vm.elestio.app/webhook-test/de293e5f-244c-4489-bf7b-1992487cc500",
+    "method": "POST"
+  },
+  "questions": [
+    {
+      "id": "brandStory",
+      "type": "textarea",
+      "label": "What's the story behind your brand?",
+      "placeholder": "Share the inspiration, why your brand was started, and what problem you're solving for customers...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "mission",
+      "type": "text",
+      "label": "What's your mission?",
+      "placeholder": "Our mission is to...",
+      "required": true
+    },
+    {
+      "id": "vision",
+      "type": "text",
+      "label": "What's your vision?",
+      "placeholder": "In 5-10 years, we envision...",
+      "required": true
+    },
+    {
+      "id": "purpose",
+      "type": "text",
+      "label": "What's your deeper purpose?",
+      "placeholder": "We exist to...",
+      "required": true
+    },
+    {
+      "id": "coreValues",
+      "type": "textarea",
+      "label": "What are your core values?",
+      "placeholder": "1. Integrity\n2. Innovation\n3. Customer-first\n4. ...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "personality",
+      "type": "checkbox",
+      "label": "Brand Personality",
+      "required": true,
+      "options": [
+        { "value": "Friendly", "label": "Friendly" },
+        { "value": "Bold", "label": "Bold" },
+        { "value": "Playful", "label": "Playful" },
+        { "value": "Premium", "label": "Premium" },
+        { "value": "Minimalist", "label": "Minimalist" },
+        { "value": "Approachable", "label": "Approachable" },
+        { "value": "Innovative", "label": "Innovative" },
+        { "value": "Trusted", "label": "Trusted" }
+      ]
+    },
+    {
+      "id": "personalityOther",
+      "type": "text",
+      "label": "Other Brand Personality Traits",
+      "placeholder": "Other personality traits...",
+      "required": false
+    },
+    {
+      "id": "keyMessages",
+      "type": "textarea",
+      "label": "Key Messages",
+      "placeholder": "1.\n2.\n3.",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "targetAudience",
+      "type": "textarea",
+      "label": "Who are your ideal customers?",
+      "placeholder": "Describe your ideal customers, what they care about most, and what their pain points are...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "demographics",
+      "type": "checkbox",
+      "label": "Customer Demographics",
+      "required": true,
+      "options": [
+        { "value": "Gen Z (under 25)", "label": "Gen Z (under 25)" },
+        { "value": "Millennials (25-40)", "label": "Millennials (25-40)" },
+        { "value": "Gen X (40-55)", "label": "Gen X (40-55)" },
+        { "value": "Boomers (55+)", "label": "Boomers (55+)" },
+        { "value": "Male / Female / All genders", "label": "Male / Female / All genders" }
+      ]
+    },
+    {
+      "id": "demographicsOther",
+      "type": "text",
+      "label": "Other Demographics",
+      "placeholder": "Other demographics...",
+      "required": false
+    },
+    {
+      "id": "psychographics",
+      "type": "checkbox",
+      "label": "Customer Psychographics",
+      "required": true,
+      "options": [
+        { "value": "Health-conscious", "label": "Health-conscious" },
+        { "value": "Eco-conscious", "label": "Eco-conscious" },
+        { "value": "Trend-seeking", "label": "Trend-seeking" },
+        { "value": "Luxury-seeking", "label": "Luxury-seeking" },
+        { "value": "Family-oriented", "label": "Family-oriented" },
+        { "value": "Budget-conscious", "label": "Budget-conscious" }
+      ]
+    },
+    {
+      "id": "psychographicsOther",
+      "type": "text",
+      "label": "Other Psychographics",
+      "placeholder": "Other psychographics...",
+      "required": false
+    },
+    {
+      "id": "competitors",
+      "type": "textarea",
+      "label": "Competitors & Industry",
+      "placeholder": "List your main competitors and explain what makes you different from them...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "heroProducts",
+      "type": "textarea",
+      "label": "Hero Products / Services",
+      "placeholder": "Describe your hero products or services...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "upcomingLaunches",
+      "type": "textarea",
+      "label": "Upcoming Launches or NPD",
+      "placeholder": "Describe any upcoming launches or new product development...",
+      "required": false,
+      "rows": 4
+    },
+    {
+      "id": "pricingStrategy",
+      "type": "checkbox",
+      "label": "Pricing Strategy",
+      "required": true,
+      "options": [
+        { "value": "Premium / High-end", "label": "Premium / High-end" },
+        { "value": "Mid-market", "label": "Mid-market" },
+        { "value": "Value-driven", "label": "Value-driven" },
+        { "value": "Subscription / Tiered pricing", "label": "Subscription / Tiered pricing" }
+      ]
+    },
+    {
+      "id": "pricingStrategyOther",
+      "type": "text",
+      "label": "Other Pricing Strategy",
+      "placeholder": "Other pricing strategy...",
+      "required": false
+    },
+    {
+      "id": "instagram",
+      "type": "text",
+      "label": "Instagram URL",
+      "placeholder": "https://instagram.com/yourbrand",
+      "required": false
+    },
+    {
+      "id": "tiktok",
+      "type": "text",
+      "label": "TikTok URL",
+      "placeholder": "https://tiktok.com/@yourbrand",
+      "required": false
+    },
+    {
+      "id": "facebook",
+      "type": "text",
+      "label": "Facebook URL",
+      "placeholder": "https://facebook.com/yourbrand",
+      "required": false
+    },
+    {
+      "id": "linkedin",
+      "type": "text",
+      "label": "LinkedIn URL",
+      "placeholder": "https://linkedin.com/company/yourbrand",
+      "required": false
+    },
+    {
+      "id": "youtube",
+      "type": "text",
+      "label": "YouTube URL",
+      "placeholder": "https://youtube.com/c/yourbrand",
+      "required": false
+    },
+    {
+      "id": "pinterest",
+      "type": "text",
+      "label": "Pinterest URL",
+      "placeholder": "https://pinterest.com/yourbrand",
+      "required": false
+    },
+    {
+      "id": "website",
+      "type": "text",
+      "label": "Website URL",
+      "placeholder": "https://yourbrand.com",
+      "required": false
+    },
+    {
+      "id": "newsletter",
+      "type": "text",
+      "label": "Email Newsletter URL",
+      "placeholder": "Newsletter signup URL",
+      "required": false
+    },
+    {
+      "id": "otherChannels",
+      "type": "text",
+      "label": "Other Digital Channels",
+      "placeholder": "Other channels...",
+      "required": false
+    },
+    {
+      "id": "priorityChannels",
+      "type": "textarea",
+      "label": "Which channels matter most to you right now?",
+      "placeholder": "Tell us which channels are your priority and why...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "marketingChannels",
+      "type": "checkbox",
+      "label": "Other Marketing Channels",
+      "required": true,
+      "options": [
+        { "value": "Email", "label": "Email" },
+        { "value": "Influencer partnerships", "label": "Influencer partnerships" },
+        { "value": "PR / Media", "label": "PR / Media" },
+        { "value": "Print / OOH", "label": "Print / OOH" },
+        { "value": "Events / Sponsorships", "label": "Events / Sponsorships" }
+      ]
+    },
+    {
+      "id": "marketingChannelsOther",
+      "type": "text",
+      "label": "Other Marketing Channels",
+      "placeholder": "Other marketing channels...",
+      "required": false
+    },
+    {
+      "id": "runsPaidAds",
+      "type": "radio",
+      "label": "Do you currently run paid ads?",
+      "required": true,
+      "options": [
+        { "value": "Yes", "label": "Yes" },
+        { "value": "No", "label": "No" }
+      ]
+    },
+    {
+      "id": "adBudgetProcess",
+      "type": "textarea",
+      "label": "How do you set your advertising budget?",
+      "placeholder": "Describe how you determine your advertising budget...",
+      "required": false,
+      "rows": 4
+    },
+    {
+      "id": "adSpend",
+      "type": "radio",
+      "label": "Monthly Ad Spend Range",
+      "required": false,
+      "options": [
+        { "value": "<$2,500", "label": "<$2,500" },
+        { "value": "$2,500–$10,000", "label": "$2,500–$10,000" },
+        { "value": "$10,000–$50,000", "label": "$10,000–$50,000" },
+        { "value": "$50,000-$100,000", "label": "$50,000-$100,000" },
+        { "value": "$100,000-$150,000", "label": "$100,000-$150,000" }
+      ]
+    },
+    {
+      "id": "adSpendOther",
+      "type": "text",
+      "label": "Other Monthly Ad Spend",
+      "placeholder": "Other amount...",
+      "required": false
+    },
+    {
+      "id": "campaignGoals",
+      "type": "checkbox",
+      "label": "Main Campaign Goals",
+      "required": false,
+      "options": [
+        { "value": "Awareness", "label": "Awareness" },
+        { "value": "Engagement", "label": "Engagement" },
+        { "value": "Conversions", "label": "Conversions (sales, leads)" },
+        { "value": "Retargeting", "label": "Retargeting" }
+      ]
+    },
+    {
+      "id": "campaignGoalsOther",
+      "type": "text",
+      "label": "Other Campaign Goals",
+      "placeholder": "Other campaign goals...",
+      "required": false
+    },
+    {
+      "id": "bestAds",
+      "type": "textarea",
+      "label": "Best Performing Ads",
+      "placeholder": "Share links/screenshots or describe your best performing ads...",
+      "required": false,
+      "rows": 4
+    },
+    {
+      "id": "worstAds",
+      "type": "textarea",
+      "label": "Least Performing Ads",
+      "placeholder": "Describe your least performing ads and why you think they didn't work...",
+      "required": false,
+      "rows": 4
+    },
+    {
+      "id": "analyticsTools",
+      "type": "checkbox",
+      "label": "Analytics Tools in Use",
+      "required": false,
+      "options": [
+        { "value": "Meta Business Manager", "label": "Meta Business Manager" },
+        { "value": "Google Analytics (GA4)", "label": "Google Analytics (GA4)" },
+        { "value": "Shopify Analytics", "label": "Shopify Analytics" },
+        { "value": "Klaviyo", "label": "Klaviyo" },
+        { "value": "Hubspot / CRM", "label": "Hubspot / CRM" },
+        { "value": "None currently", "label": "None currently" }
+      ]
+    },
+    {
+      "id": "analyticsToolsOther",
+      "type": "text",
+      "label": "Other Analytics Tools",
+      "placeholder": "Other analytics tools...",
+      "required": false
+    },
+    {
+      "id": "admiredBrands",
+      "type": "textarea",
+      "label": "Brands You Admire",
+      "placeholder": "List brands you admire and what you like about them...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "creativeStyles",
+      "type": "checkbox",
+      "label": "Creative Styles You Like",
+      "required": true,
+      "options": [
+        { "value": "Minimalist", "label": "Minimalist" },
+        { "value": "Bold / Loud", "label": "Bold / Loud" },
+        { "value": "Premium / Luxury", "label": "Premium / Luxury" },
+        { "value": "Playful / Humorous", "label": "Playful / Humorous" },
+        { "value": "Natural / Authentic", "label": "Natural / Authentic" }
+      ]
+    },
+    {
+      "id": "creativeStylesOther",
+      "type": "text",
+      "label": "Other Creative Styles",
+      "placeholder": "Other creative styles...",
+      "required": false
+    },
+    {
+      "id": "creativeNoGos",
+      "type": "textarea",
+      "label": "Creative No-Gos",
+      "placeholder": "Share any creative directions, colors, styles, or messaging approaches that don't feel right for your brand...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "toneOfVoice",
+      "type": "checkbox",
+      "label": "Tone of Voice",
+      "required": true,
+      "options": [
+        { "value": "Friendly", "label": "Friendly" },
+        { "value": "Professional", "label": "Professional" },
+        { "value": "Bold", "label": "Bold" },
+        { "value": "Playful", "label": "Playful" },
+        { "value": "Inspirational", "label": "Inspirational" },
+        { "value": "Informative / Educational", "label": "Informative / Educational" }
+      ]
+    },
+    {
+      "id": "toneOfVoiceOther",
+      "type": "text",
+      "label": "Other Tone of Voice",
+      "placeholder": "Other tone of voice...",
+      "required": false
+    },
+    {
+      "id": "contactInfo",
+      "type": "textarea",
+      "label": "Main Point of Contact",
+      "placeholder": "Please provide contact details for your main point of contact...",
+      "required": true,
+      "rows": 4
+    },
+    {
+      "id": "approvalWorkflow",
+      "type": "checkbox",
+      "label": "Approval Workflow",
+      "required": true,
+      "options": [
+        { "value": "Slack", "label": "Slack" },
+        { "value": "Email", "label": "Email" },
+        { "value": "Asana / Trello / Monday.com", "label": "Asana / Trello / Monday.com" },
+        { "value": "Google Drive / Shared Docs", "label": "Google Drive / Shared Docs" }
+      ]
+    },
+    {
+      "id": "approvalWorkflowOther",
+      "type": "text",
+      "label": "Other Approval Methods",
+      "placeholder": "Other approval methods...",
+      "required": false
+    },
+    {
+      "id": "keyDates",
+      "type": "checkbox",
+      "label": "Key Dates We Should Be Aware Of",
+      "required": false,
+      "options": [
+        { "value": "Seasonal campaigns", "label": "Seasonal campaigns (e.g. Black Friday, Christmas)" },
+        { "value": "Product launches", "label": "Product launches" },
+        { "value": "Industry events", "label": "Industry events" },
+        { "value": "Brand anniversaries", "label": "Brand anniversaries" }
+      ]
+    },
+    {
+      "id": "keyDatesDetails",
+      "type": "textarea",
+      "label": "Key Dates Details",
+      "placeholder": "Add details about the key dates selected above...",
+      "required": false,
+      "rows": 4
+    },
+    {
+      "id": "existingAssets",
+      "type": "checkbox",
+      "label": "Existing Assets You Can Share With Us",
+      "required": false,
+      "options": [
+        { "value": "Brand guidelines", "label": "Brand guidelines" },
+        { "value": "Logo files", "label": "Logo files" },
+        { "value": "Product photography", "label": "Product photography" },
+        { "value": "Past campaign assets", "label": "Past campaign assets" },
+        { "value": "Ad performance reports", "label": "Ad performance reports" }
+      ]
+    },
+    {
+      "id": "existingAssetsOther",
+      "type": "text",
+      "label": "Other Existing Assets",
+      "placeholder": "Other existing assets...",
+      "required": false
+    },
+    {
+      "id": "brandGuidelines",
+      "type": "file",
+      "label": "Upload Brand Guidelines",
+      "placeholder": "Drop your brand guidelines document here or click to browse",
+      "required": false,
+      "accept": ".pdf,.doc,.docx",
+      "maxFiles": 1,
+      "maxSize": 10
+    },
+    {
+      "id": "logoFiles",
+      "type": "file",
+      "label": "Upload Logo Files",
+      "placeholder": "Drop your logo files here or click to browse",
+      "required": false,
+      "accept": ".png,.jpg,.jpeg,.svg,.ai,.eps",
+      "maxFiles": 5,
+      "maxSize": 5
+    },
+    {
+      "id": "existingCreatives",
+      "type": "file",
+      "label": "Upload Existing Creative Assets",
+      "placeholder": "Drop any existing creative work here or click to browse",
+      "required": false,
+      "accept": ".png,.jpg,.jpeg,.pdf,.ai,.psd",
+      "maxFiles": 10,
+      "maxSize": 10
+    },
+    {
+      "id": "accessRequired",
+      "type": "checkbox",
+      "label": "Access Required",
+      "required": false,
+      "options": [
+        { "value": "Meta Business Manager", "label": "Meta Business Manager" },
+        { "value": "Google Analytics", "label": "Google Analytics" },
+        { "value": "Website backend", "label": "Website backend" },
+        { "value": "Ecommerce platform", "label": "Ecommerce platform (Shopify, WooCommerce, etc.)" }
+      ]
+    },
+    {
+      "id": "accessRequiredOther",
+      "type": "text",
+      "label": "Other Access Requirements",
+      "placeholder": "Other access requirements...",
+      "required": false
+    }
+  ],
+  "styling": {
+    "primaryColor": "#007bff",
+    "backgroundColor": "#f8f9fa",
+    "fontFamily": "Inter, sans-serif"
+  },
+  "messages": {
+    "submitButton": "Generate Report",
+    "successMessage": "Your onboarding report has been generated! Copy the markdown below and paste it into Notion.",
+    "errorMessage": "Please fill out all required fields.",
+    "copyButton": "Copy to Clipboard",
+    "copiedMessage": "Copied to clipboard!"
+  }
+}

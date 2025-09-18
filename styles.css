@@ -178,6 +178,126 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* Section Indicator */
+.section-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 10;
+    margin-bottom: 20px;
+}
+
+.section-icon {
+    font-size: 1.2rem;
+}
+
+.section-title {
+    font-weight: 600;
+}
+
+/* Section Break Overlay */
+.section-break-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section-break-overlay.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.section-break-content {
+    text-align: center;
+    max-width: 500px;
+    padding: 40px;
+}
+
+.section-break-icon {
+    font-size: 4rem;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.section-break-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.section-break-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 32px;
+    line-height: 1.4;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Structured Input */
+.structured-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.structured-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.structured-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.structured-input {
+    font-size: 1rem;
+}
+
+/* Other Option Input */
+.other-option-container {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.other-input {
+    margin-top: 0;
+}
+
 /* Individual Question Styles */
 .individual-question {
     text-align: left;

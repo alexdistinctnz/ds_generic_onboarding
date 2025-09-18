@@ -2,8 +2,10 @@ class TypeformOnboarding {
     constructor() {
         this.config = null;
         this.currentQuestionIndex = -1; // -1 for welcome screen
+        this.currentSectionIndex = -1; // Track current section
         this.answers = {};
         this.questionScreens = [];
+        this.visibleQuestions = []; // Questions to show based on conditional logic
         this.isTransitioning = false; // Track if we're currently transitioning
         
         // DOM elements
@@ -20,6 +22,7 @@ class TypeformOnboarding {
     async init() {
         try {
             await this.loadConfig();
+            this.buildVisibleQuestions();
             this.setupWelcomeScreen();
             this.createQuestionScreens();
             this.setupEventListeners();
@@ -36,6 +39,11 @@ class TypeformOnboarding {
             throw new Error('Failed to load configuration');
         }
         this.config = await response.json();
+    }
+
+    buildVisibleQuestions() {
+        // Initially show all questions, conditional logic will be applied during navigation
+        this.visibleQuestions = [...this.config.questions];
     }
 
     setupWelcomeScreen() {
@@ -55,10 +63,52 @@ class TypeformOnboarding {
         }
     }
 
+    shouldShowQuestion(question) {
+        if (!question.dependsOn) return true;
+        
+        const dependentAnswer = this.answers[question.dependsOn];
+        return dependentAnswer === question.showWhen;
+    }
+
+    getCurrentSection() {
+        if (!this.config.sections || this.currentQuestionIndex < 0) return null;
+        
+        const currentQuestion = this.visibleQuestions[this.currentQuestionIndex];
+        if (!currentQuestion) return null;
+        
+        return this.config.sections.find(section => 
+            section.questions.includes(currentQuestion.id)
+        );
+    }
+
+    getNextSectionIndex() {
+        const currentSection = this.getCurrentSection();
+        if (!currentSection || !this.config.sections) return -1;
+        
+        const currentSectionIndex = this.config.sections.findIndex(s => s.id === currentSection.id);
+        return currentSectionIndex + 1;
+    }
+
+    isStartOfNewSection() {
+        if (!this.config.sections || this.currentQuestionIndex < 0) return false;
+        
+        const currentQuestion = this.visibleQuestions[this.currentQuestionIndex];
+        const currentSection = this.getCurrentSection();
+        
+        if (!currentSection) return false;
+        
+        // Check if this is the first question in the section
+        const sectionQuestions = currentSection.questions.filter(qId => 
+            this.visibleQuestions.some(q => q.id === qId && this.shouldShowQuestion(q))
+        );
+        
+        return currentQuestion.id === sectionQuestions[0];
+    }
+
     createQuestionScreens() {
         this.questionsContainer.innerHTML = '';
         
-        this.config.questions.forEach((question, index) => {
+        this.visibleQuestions.forEach((question, index) => {
             const screen = this.createQuestionScreen(question, index);
             this.questionsContainer.appendChild(screen);
             this.questionScreens.push(screen);
@@ -73,11 +123,20 @@ class TypeformOnboarding {
         const content = document.createElement('div');
         content.className = 'question-content individual-question';
         
-        // Add question counter for individual questions
-        const counter = document.createElement('div');
-        counter.className = 'question-counter';
-        counter.innerHTML = `<span class="current-question">${index + 1}</span> of <span class="total-questions">${this.config.questions.length}</span>`;
-        content.appendChild(counter);
+        // Add section indicator instead of intimidating question count
+        const currentSection = this.config.sections ? this.config.sections.find(section => 
+            section.questions.includes(question.id)
+        ) : null;
+        
+        if (currentSection) {
+            const sectionIndicator = document.createElement('div');
+            sectionIndicator.className = 'section-indicator';
+            sectionIndicator.innerHTML = `
+                <span class="section-icon">${currentSection.icon}</span>
+                <span class="section-title">${currentSection.title}</span>
+            `;
+            content.appendChild(sectionIndicator);
+        }
         
         // Question title and subtitle
         const title = document.createElement('h2');
@@ -92,7 +151,7 @@ class TypeformOnboarding {
         
         const subtitle = document.createElement('p');
         subtitle.className = 'question-subtitle';
-        subtitle.textContent = this.getQuestionSubtitle(question);
+        subtitle.textContent = question.subtitle || this.getQuestionSubtitle(question);
         
         content.appendChild(title);
         if (subtitle.textContent) {
@@ -166,6 +225,8 @@ class TypeformOnboarding {
                 return this.createCheckboxGroup(question);
             case 'file':
                 return this.createFileUpload(question);
+            case 'structured':
+                return this.createStructuredInput(question);
             default:
                 return this.createTextInput(question);
         }
@@ -308,6 +369,40 @@ class TypeformOnboarding {
             container.appendChild(item);
         });
 
+        // Add "other" option if configured
+        if (question.hasOther) {
+            const otherContainer = document.createElement('div');
+            otherContainer.className = 'other-option-container';
+            
+            const otherInput = document.createElement('input');
+            otherInput.type = 'text';
+            otherInput.className = 'form-input other-input';
+            otherInput.placeholder = question.otherPlaceholder || 'Please specify...';
+            
+            otherInput.addEventListener('input', (e) => {
+                const value = e.target.value.trim();
+                if (value) {
+                    // Deselect all radio options
+                    container.querySelectorAll('.option-item').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    container.querySelectorAll('input[type="radio"]').forEach(radio => {
+                        radio.checked = false;
+                    });
+                    
+                    this.answers[question.id] = `Other: ${value}`;
+                } else {
+                    // Clear the other answer if input is empty
+                    if (this.answers[question.id] && this.answers[question.id].startsWith('Other: ')) {
+                        delete this.answers[question.id];
+                    }
+                }
+            });
+            
+            otherContainer.appendChild(otherInput);
+            container.appendChild(otherContainer);
+        }
+
         return container;
     }
 
@@ -352,6 +447,82 @@ class TypeformOnboarding {
             item.appendChild(input);
             item.appendChild(label);
             container.appendChild(item);
+        });
+
+        // Add "other" option if configured
+        if (question.hasOther) {
+            const otherContainer = document.createElement('div');
+            otherContainer.className = 'other-option-container';
+            
+            const otherInput = document.createElement('input');
+            otherInput.type = 'text';
+            otherInput.className = 'form-input other-input';
+            otherInput.placeholder = question.otherPlaceholder || 'Please specify...';
+            
+            otherInput.addEventListener('input', (e) => {
+                const value = e.target.value.trim();
+                const currentAnswers = this.answers[question.id] || [];
+                
+                // Remove any previous "other" answers
+                const filteredAnswers = currentAnswers.filter(answer => 
+                    !answer.startsWith('Other: ')
+                );
+                
+                if (value) {
+                    filteredAnswers.push(`Other: ${value}`);
+                }
+                
+                this.answers[question.id] = filteredAnswers;
+            });
+            
+            otherContainer.appendChild(otherInput);
+            container.appendChild(otherContainer);
+        }
+
+        return container;
+    }
+
+    createStructuredInput(question) {
+        const container = document.createElement('div');
+        container.className = 'structured-input-container';
+
+        // Initialize structured answers
+        if (!this.answers[question.id]) {
+            this.answers[question.id] = {};
+        }
+
+        question.structure.forEach((field, index) => {
+            const fieldContainer = document.createElement('div');
+            fieldContainer.className = 'structured-field';
+
+            const label = document.createElement('label');
+            label.className = 'structured-label';
+            label.textContent = field.label;
+            if (field.required) {
+                label.innerHTML += ' <span class="required-indicator">*</span>';
+            }
+
+            let input;
+            if (field.rows || field.type === 'textarea') {
+                input = document.createElement('textarea');
+                input.rows = field.rows || 2;
+            } else {
+                input = document.createElement('input');
+                input.type = field.type || 'text';
+            }
+
+            input.className = 'form-input structured-input';
+            input.placeholder = field.placeholder || '';
+            input.required = field.required || false;
+
+            // Auto-save structured field data
+            input.addEventListener('input', (e) => {
+                this.answers[question.id][field.label] = e.target.value.trim();
+            });
+
+            fieldContainer.appendChild(label);
+            fieldContainer.appendChild(input);
+            container.appendChild(fieldContainer);
         });
 
         return container;
@@ -676,7 +847,7 @@ class TypeformOnboarding {
         
         // Validate current question before proceeding
         if (this.currentQuestionIndex >= 0) {
-            const currentQuestion = this.config.questions[this.currentQuestionIndex];
+            const currentQuestion = this.visibleQuestions[this.currentQuestionIndex];
             if (!this.validateQuestion(currentQuestion)) {
                 return;
             }
@@ -688,11 +859,24 @@ class TypeformOnboarding {
         // Hide current screen
         this.hideCurrentScreen();
         
-        // Move to next question
-        this.currentQuestionIndex++;
+        // Find next visible question
+        let nextIndex = this.currentQuestionIndex + 1;
+        while (nextIndex < this.visibleQuestions.length) {
+            const nextQuestion = this.visibleQuestions[nextIndex];
+            if (this.shouldShowQuestion(nextQuestion)) {
+                break;
+            }
+            nextIndex++;
+        }
         
-        // Show next screen
-        if (this.currentQuestionIndex >= this.config.questions.length) {
+        this.currentQuestionIndex = nextIndex;
+        
+        // Check if we need to show a section break
+        if (this.currentQuestionIndex < this.visibleQuestions.length && this.isStartOfNewSection()) {
+            this.showSectionBreak(() => {
+                this.showQuestionScreen(this.currentQuestionIndex);
+            });
+        } else if (this.currentQuestionIndex >= this.visibleQuestions.length) {
             this.showFinalScreen();
         } else {
             this.showQuestionScreen(this.currentQuestionIndex);
@@ -867,6 +1051,42 @@ class TypeformOnboarding {
         });
     }
 
+    showSectionBreak(callback) {
+        const currentSection = this.getCurrentSection();
+        if (!currentSection) {
+            callback();
+            return;
+        }
+
+        // Create section break overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'section-break-overlay';
+        overlay.innerHTML = `
+            <div class="section-break-content">
+                <div class="section-break-icon">${currentSection.icon}</div>
+                <h2 class="section-break-title">${currentSection.title}</h2>
+                <p class="section-break-subtitle">${currentSection.subtitle}</p>
+                <button class="nav-button primary section-continue-btn">Continue</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Animate in
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 100);
+
+        // Handle continue button
+        overlay.querySelector('.section-continue-btn').addEventListener('click', () => {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                callback();
+            }, 300);
+        });
+    }
+
     showSuccessScreen() {
         setTimeout(() => {
             // Ensure no other screens are active
@@ -876,7 +1096,7 @@ class TypeformOnboarding {
     }
 
     updateProgress() {
-        const totalSteps = this.config.questions.length + 2; // +2 for welcome and final screens
+        const totalSteps = this.visibleQuestions.length + 2; // +2 for welcome and final screens
         const currentStep = Math.max(0, this.currentQuestionIndex + 2);
         const progress = (currentStep / totalSteps) * 100;
         
