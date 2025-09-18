@@ -41,6 +41,18 @@ class TypeformOnboarding {
     setupWelcomeScreen() {
         document.getElementById('form-title').textContent = this.config.title;
         document.getElementById('form-description').textContent = this.config.description;
+        
+        // Add version number if available
+        if (this.config.version) {
+            const versionElement = document.createElement('div');
+            versionElement.className = 'form-version';
+            versionElement.textContent = `v${this.config.version}`;
+            
+            // Insert after the description
+            const welcomeContent = document.querySelector('#welcome-screen .question-content');
+            const description = document.getElementById('form-description');
+            welcomeContent.insertBefore(versionElement, description.nextSibling);
+        }
     }
 
     createQuestionScreens() {
