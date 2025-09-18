@@ -61,24 +61,21 @@ body {
     font-weight: 700;
 }
 
-/* Question Screens */
+/* Question Screens - 3 Section Layout */
 .question-screen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    min-height: 100vh;
-    max-height: 100vh;
+    height: 100vh;
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 40px 40px 60px 40px;
+    padding: 0;
     opacity: 0;
     transform: translateX(50px);
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .question-screen.active {
@@ -92,17 +89,40 @@ body {
     transform: translateX(-50px);
 }
 
-.question-content {
-    max-width: 600px;
+/* Top Section - Question Header */
+.question-header {
     width: 100%;
-    text-align: center;
-    margin-bottom: 40px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    padding: 20px 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
     position: relative;
+}
+
+/* Middle Section - Scrollable Content */
+.question-content {
     flex: 1;
+    width: 100%;
+    max-width: 600px;
+    padding: 40px;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+/* Bottom Section - Navigation */
+.question-footer {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    padding: 20px 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    display: flex;
     justify-content: center;
-    min-height: auto;
 }
 
 /* Icons */
@@ -142,18 +162,20 @@ body {
 }
 
 .question-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: white;
-    margin-bottom: 16px;
+    margin: 0 0 8px 0;
     line-height: 1.2;
+    text-align: left;
 }
 
 .question-subtitle {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 32px;
+    margin: 0;
     line-height: 1.4;
+    text-align: left;
 }
 
 .helper-text {
@@ -190,19 +212,19 @@ body {
 /* Section Indicator */
 .section-indicator {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     color: rgba(255, 255, 255, 0.8);
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 500;
-    z-index: 5;
 }
 
 .section-icon {
@@ -311,26 +333,11 @@ body {
     margin-top: 0;
 }
 
-/* Individual Question Styles */
-.individual-question {
-    text-align: left;
+/* Content Area Styles */
+.question-content-area {
+    width: 100%;
     max-width: 500px;
-    justify-content: flex-start;
-    padding-top: 60px;
-}
-
-.individual-question .question-title {
-    font-size: 2rem;
     text-align: left;
-    margin-top: 20px;
-    margin-bottom: 24px;
-}
-
-.individual-question .question-subtitle {
-    font-size: 1rem;
-    text-align: left;
-    margin-bottom: 24px;
-    opacity: 0.8;
 }
 
 /* Required Field Styling */
@@ -588,8 +595,6 @@ textarea.form-input {
     justify-content: center;
     width: 100%;
     max-width: 500px;
-    margin-top: 40px;
-    padding: 20px 0;
 }
 
 .nav-button {
@@ -830,41 +835,31 @@ textarea.form-input {
 /* Responsive Design */
 @media (max-width: 768px) {
     .typeform-container {
-        padding: 20px;
+        padding: 0;
     }
     
-    .question-screen {
-        padding: 20px 20px 60px 20px;
+    .question-header {
+        padding: 15px 20px;
     }
     
     .question-content {
-        max-width: 100%;
+        padding: 20px;
+    }
+    
+    .question-footer {
+        padding: 15px 20px;
     }
     
     .question-title {
-        font-size: 2rem;
+        font-size: 1.7rem;
     }
     
     .question-subtitle {
-        font-size: 1.1rem;
-    }
-    
-    .individual-question {
-        padding-top: 40px;
-    }
-    
-    .individual-question .question-title {
-        font-size: 1.7rem;
-        margin-left: -10px;
-        margin-right: -10px;
-        padding-left: 10px;
-        padding-right: 10px;
+        font-size: 0.9rem;
     }
     
     .navigation {
         flex-direction: column;
-        padding: 20px 0;
-        margin-top: 30px;
     }
     
     .nav-button {
@@ -872,9 +867,6 @@ textarea.form-input {
     }
     
     .section-indicator {
-        position: absolute;
-        top: 10px;
-        right: 10px;
         font-size: 0.75rem;
         padding: 6px 12px;
     }

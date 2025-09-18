@@ -120,10 +120,11 @@ class TypeformOnboarding {
         screen.className = 'question-screen';
         screen.id = `question-${index}`;
         
-        const content = document.createElement('div');
-        content.className = 'question-content individual-question';
+        // Create top section - header
+        const header = document.createElement('div');
+        header.className = 'question-header';
         
-        // Add section indicator instead of intimidating question count
+        // Add section indicator
         const currentSection = this.config.sections ? this.config.sections.find(section => 
             section.questions.includes(question.id)
         ) : null;
@@ -135,7 +136,7 @@ class TypeformOnboarding {
                 <span class="section-icon">${currentSection.icon}</span>
                 <span class="section-title">${currentSection.title}</span>
             `;
-            content.appendChild(sectionIndicator);
+            header.appendChild(sectionIndicator);
         }
         
         // Question title and subtitle
@@ -153,37 +154,44 @@ class TypeformOnboarding {
         subtitle.className = 'question-subtitle';
         subtitle.textContent = question.subtitle || this.getQuestionSubtitle(question);
         
-        content.appendChild(title);
+        header.appendChild(title);
         if (subtitle.textContent) {
-            content.appendChild(subtitle);
+            header.appendChild(subtitle);
         }
         
-        // Input element
-        const inputContainer = document.createElement('div');
-        inputContainer.className = 'input-container';
+        screen.appendChild(header);
         
-        // Add required guidance message right before the input
+        // Create middle section - content
+        const content = document.createElement('div');
+        content.className = 'question-content';
+        
+        const contentArea = document.createElement('div');
+        contentArea.className = 'question-content-area';
+        
+        // Add required guidance message
         if (question.required) {
             const requiredGuidance = document.createElement('div');
             requiredGuidance.className = 'required-guidance';
             requiredGuidance.innerHTML = `<span class="guidance-icon">💡</span> This question is required to continue`;
-            inputContainer.appendChild(requiredGuidance);
+            contentArea.appendChild(requiredGuidance);
         }
         
         const inputElement = this.createInputElement(question);
-        inputContainer.appendChild(inputElement);
-        
-        content.appendChild(inputContainer);
+        contentArea.appendChild(inputElement);
         
         // Helper text
         const helperText = document.createElement('div');
         helperText.className = 'helper-text';
         helperText.innerHTML = this.getHelperText(question);
-        content.appendChild(helperText);
+        contentArea.appendChild(helperText);
         
+        content.appendChild(contentArea);
         screen.appendChild(content);
         
-        // Navigation
+        // Create bottom section - footer
+        const footer = document.createElement('div');
+        footer.className = 'question-footer';
+        
         const navigation = document.createElement('div');
         navigation.className = 'navigation';
         
@@ -204,7 +212,8 @@ class TypeformOnboarding {
         }
         navigation.appendChild(nextButton);
         
-        screen.appendChild(navigation);
+        footer.appendChild(navigation);
+        screen.appendChild(footer);
         
         return screen;
     }
