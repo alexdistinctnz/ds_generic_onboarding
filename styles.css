@@ -178,6 +178,18 @@ body {
     text-align: left;
 }
 
+/* Welcome Screen Specific Styles */
+.welcome-description {
+    text-align: center !important;
+    margin-bottom: 32px !important;
+    font-size: 1.2rem !important;
+}
+
+.welcome-button {
+    margin: 0 auto 24px auto;
+    display: block;
+}
+
 .helper-text {
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.7);
@@ -213,7 +225,7 @@ body {
 .section-indicator {
     position: absolute;
     top: 50%;
-    right: 0;
+    right: 20px;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
@@ -867,6 +879,7 @@ textarea.form-input {
     }
     
     .section-indicator {
+        right: 15px;
         font-size: 0.75rem;
         padding: 6px 12px;
     }
