@@ -186,8 +186,16 @@ body {
 }
 
 .welcome-button {
+    margin: 0 auto 16px auto;
+    display: block;
+}
+
+.debug-webhook-button {
     margin: 0 auto 24px auto;
     display: block;
+    font-size: 0.9rem !important;
+    padding: 12px 24px !important;
+    opacity: 0.8;
 }
 
 .helper-text {
@@ -216,6 +224,7 @@ body {
     font-size: 0.75rem;
     font-weight: 500;
     margin-top: 16px;
+    margin-bottom: 40px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     text-transform: uppercase;
     letter-spacing: 0.5px;

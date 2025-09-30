@@ -1264,44 +1264,6 @@ class TypeformOnboarding {
         return markdown;
     }
 
-    async sendToWebhook(markdown) {
-        try {
-            const payload = {
-                timestamp: new Date().toISOString(),
-                title: this.config.title,
-                markdown: markdown,
-                responses: this.answers,
-                metadata: {
-                    totalQuestions: this.config.questions.length,
-                    completedAt: new Date().toISOString(),
-                    userAgent: navigator.userAgent
-                }
-            };
-
-            const response = await fetch(this.config.webhook.url, {
-                method: this.config.webhook.method || 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                // Show success status
-                const webhookStatus = document.getElementById('webhook-status');
-                if (webhookStatus) {
-                    webhookStatus.style.display = 'flex';
-                }
-            } else {
-                throw new Error(`Webhook failed with status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Webhook error:', error);
-            // Don't show error to user as report generation still succeeded
-            // Could optionally show a subtle warning that data wasn't sent
-        }
-    }
-
     downloadMarkdown() {
         const markdown = document.getElementById('markdown-text').value;
         const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
@@ -1363,6 +1325,170 @@ class TypeformOnboarding {
             button.disabled = false;
             button.style.opacity = '';
         });
+    }
+
+    async debugWebhook() {
+        const debugBtn = document.getElementById('debug-webhook-button');
+        const originalText = debugBtn.innerHTML;
+
+        // Show loading state
+        debugBtn.innerHTML = '<div class="button-spinner"></div>';
+        debugBtn.disabled = true;
+
+        // Create test data
+        const testAnswers = {
+            brandStory: "This is a test brand story. We started our company in 2020 to solve the problem of inefficient onboarding processes.",
+            mission: "Our mission is to make brand discovery seamless and delightful for creative agencies and their clients.",
+            purpose: "We exist to bridge the gap between brands and their creative partners.",
+            vision: "In 5-10 years, we envision being the industry standard for brand onboarding worldwide.",
+            coreValues: "1. Transparency\n2. Innovation\n3. Client Success\n4. Simplicity\n5. Excellence",
+            personality: ["Friendly", "Innovative", "Trusted"],
+            keyMessages: "1. Onboarding made simple\n2. Your brand, your story\n3. Data-driven creative decisions",
+            targetAudience: {
+                "Who they are": "Marketing directors and brand managers at mid-sized companies, ages 30-45",
+                "What they care about": "Efficiency, quality creative output, ROI on marketing spend",
+                "Their pain points": "Disorganized onboarding processes, miscommunication with agencies, wasted time"
+            },
+            demographics: ["Millennials (30-40)", "Gen X (40-55)", "All Genders"],
+            psychographics: ["Trend-seeking", "Budget-conscious"],
+            competitors: "Our main competitors are Typeform and Google Forms. We differentiate by focusing specifically on brand discovery with beautiful UX.",
+            heroProducts: "Brand Discovery Questionnaire - our flagship product that captures comprehensive brand information in 10-15 minutes.",
+            pricingStrategy: ["Mid-market", "Subscription / Tiered pricing"],
+            priorityChannels: "We focus primarily on LinkedIn for B2B outreach and Instagram for showcasing our design work. Email marketing is our secondary channel.",
+            marketingChannels: ["Email", "Influencer partnerships", "PR / Media"],
+            runsPaidAds: "Yes",
+            adBudgetProcess: "We allocate 15% of monthly revenue to paid advertising, split 60/40 between LinkedIn and Meta ads.",
+            adSpend: "$2,500–$10,000",
+            campaignGoals: ["Awareness", "Conversions"],
+            bestAds: "Our best performing ad featured a before/after comparison of disorganized vs organized brand docs. CTR of 4.2%.",
+            worstAds: "Generic 'we help brands' messaging performed poorly. Too vague, no specific value proposition.",
+            analyticsTools: ["Meta Business Manager", "Google Analytics (GA4)"],
+            admiredBrands: "We admire Notion for their product-led growth, Stripe for developer experience, and Apple for design consistency.",
+            creativeStyles: ["Minimalist", "Premium / Luxury", "Friendly", "Professional"],
+            creativeNoGos: "Avoid overly corporate stock photos, aggressive sales language, and cluttered layouts.",
+            contactInfo: {
+                "Name": "Jane Smith",
+                "Email": "jane.smith@testbrand.com",
+                "Phone": "+1 (555) 123-4567",
+                "Role/Title": "Marketing Director"
+            },
+            approvalWorkflow: ["Slack", "Email"],
+            keyDates: ["Seasonal campaigns", "Product launches"],
+            existingAssets: "We have brand guidelines (PDF), logo files in SVG/PNG, product photography, and Q4 2024 campaign performance reports.",
+            accessRequired: ["Meta Business Manager", "Google Analytics"]
+        };
+
+        // Generate test markdown
+        const testMarkdown = this.generateTestMarkdown(testAnswers);
+
+        try {
+            // Send to webhook
+            await this.sendToWebhook(testMarkdown, testAnswers);
+
+            // Show success
+            debugBtn.innerHTML = '✓ Webhook Test Sent!';
+            debugBtn.style.background = 'linear-gradient(135deg, #00d4aa 0%, #00a8ff 100%)';
+
+            this.showGentleError('Test data sent successfully! Check your webhook endpoint.');
+
+            setTimeout(() => {
+                debugBtn.innerHTML = originalText;
+                debugBtn.disabled = false;
+                debugBtn.style.background = '';
+            }, 3000);
+        } catch (error) {
+            console.error('Debug webhook error:', error);
+            debugBtn.innerHTML = '✗ Webhook Failed';
+            debugBtn.style.background = 'rgba(255, 107, 107, 0.8)';
+
+            this.showError('Webhook test failed. Check console for details.');
+
+            setTimeout(() => {
+                debugBtn.innerHTML = originalText;
+                debugBtn.disabled = false;
+                debugBtn.style.background = '';
+            }, 3000);
+        }
+    }
+
+    generateTestMarkdown(testAnswers) {
+        const timestamp = new Date().toISOString();
+        let markdown = `# ${this.config.title} [TEST DATA]\n\n`;
+
+        markdown += `**Submitted:** ${new Date(timestamp).toLocaleDateString()} at ${new Date(timestamp).toLocaleTimeString()}\n\n`;
+        markdown += `---\n\n`;
+
+        // Generate markdown for each answer
+        Object.entries(testAnswers).forEach(([key, value]) => {
+            const question = this.config.questions.find(q => q.id === key);
+            if (!question) return;
+
+            markdown += `## ${question.label}\n\n`;
+
+            if (typeof value === 'object' && !Array.isArray(value)) {
+                // Structured answers
+                Object.entries(value).forEach(([fieldKey, fieldValue]) => {
+                    markdown += `**${fieldKey}:** ${fieldValue}\n\n`;
+                });
+            } else if (Array.isArray(value)) {
+                // Array answers
+                value.forEach(item => {
+                    markdown += `- ${item}\n`;
+                });
+                markdown += `\n`;
+            } else if (question.type === 'textarea') {
+                markdown += `${value}\n\n`;
+            } else {
+                markdown += `**${value}**\n\n`;
+            }
+        });
+
+        markdown += `---\n\n`;
+        markdown += `*[TEST DATA] Generated by ${this.config.title} on ${new Date().toLocaleDateString()}*`;
+
+        return markdown;
+    }
+
+    async sendToWebhook(markdown, answers = null) {
+        if (!this.config.webhook || !this.config.webhook.enabled) {
+            throw new Error('Webhook not configured');
+        }
+
+        try {
+            const payload = {
+                timestamp: new Date().toISOString(),
+                title: this.config.title,
+                markdown: markdown,
+                responses: answers || this.answers,
+                metadata: {
+                    totalQuestions: this.config.questions.length,
+                    completedAt: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                }
+            };
+
+            const response = await fetch(this.config.webhook.url, {
+                method: this.config.webhook.method || 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                // Show success status
+                const webhookStatus = document.getElementById('webhook-status');
+                if (webhookStatus) {
+                    webhookStatus.style.display = 'flex';
+                }
+                return true;
+            } else {
+                throw new Error(`Webhook failed with status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Webhook error:', error);
+            throw error;
+        }
     }
 }
 
