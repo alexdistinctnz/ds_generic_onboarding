@@ -60,7 +60,7 @@
   },
   "webhook": {
     "enabled": true,
-    "url": "https://n8n-n6lmm-u17933.vm.elestio.app/webhook-test/b89d45ac-7ab3-4afa-ab6f-70fb4fd3bd70",
+    "url": "https://n8n-n6lmm-u17933.vm.elestio.app/webhook/b89d45ac-7ab3-4afa-ab6f-70fb4fd3bd70",
     "method": "POST"
   },
   "questions": [
